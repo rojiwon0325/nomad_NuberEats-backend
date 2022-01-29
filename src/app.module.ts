@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import * as Joi from 'joi';
 import { GraphQLModule } from '@nestjs/graphql';
-import { RestaurantModule } from './restaurant/restaurant.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { Restaurant } from './restaurant/entity/restaurant.entity';
+import { User } from './user/entity/user.entity';
+import { UserModule } from './user/user.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
-    RestaurantModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `.env.${process.env.NODE_ENV}`,
@@ -31,11 +31,13 @@ import { Restaurant } from './restaurant/entity/restaurant.entity';
       database: process.env.DB_DATABASE,
       synchronize: true,
       logging: true,
-      entities: [Restaurant],
+      entities: [User],
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
     }),
+    UserModule,
+    CommonModule,
   ],
   controllers: [],
   providers: [],

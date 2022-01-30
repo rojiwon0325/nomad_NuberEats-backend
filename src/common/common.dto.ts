@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
-export class CommonOutput {
+export class MutationOutput {
   @Field(() => String, { nullable: true })
   error?: string;
 

@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateAccountInput } from './user.dto';
-import { LoginInput, LoginOutput, User } from './entity/user.entity';
-import { MutationOutput } from '@global/global.dto';
+import {
+  CreateAccountInput,
+  EditProfileInput,
+  LoginInput,
+  LoginOutput,
+} from './user.dto';
+import { User } from './entity/user.entity';
+import { CoreOutput } from '@global/global.dto';
 import { JwtService } from '@jwt/jwt.service';
 
 @Injectable()
@@ -16,7 +21,7 @@ export class UserService {
     email,
     password,
     role,
-  }: CreateAccountInput): Promise<MutationOutput> {
+  }: CreateAccountInput): Promise<CoreOutput> {
     try {
       const exist = await this.userRepository.findOne({ email });
       if (exist) {
@@ -49,5 +54,13 @@ export class UserService {
 
   async findById(id: number): Promise<User> {
     return this.userRepository.findOne(id);
+  }
+
+  async editProfile(id: number, edit: EditProfileInput) {
+    this.userRepository.update({ id }, edit);
+    //update는 db에 곧바로 query문을 전달하는 형태 entity점검 x
+    //따라서 BeforeUpdate등을 실행하지 않음
+    //entity를 사용하려면 수정된 user를 통째로
+    //save함수에 넣어서 실행해야 함, ex) save(updatedUser);
   }
 }

@@ -2,13 +2,11 @@ import {
   Field,
   InputType,
   ObjectType,
-  PickType,
   registerEnumType,
 } from '@nestjs/graphql';
 import { CoreEntity } from '@global/global.entity';
 import { Column, Entity } from 'typeorm';
 import { IsString, IsEnum, IsEmail } from 'class-validator';
-import { MutationOutput } from '@global/global.dto';
 
 enum UserRole {
   Client = 'client',
@@ -42,12 +40,4 @@ export class User extends CoreEntity {
   @IsEnum(UserRole)
   @Field(() => UserRole)
   role: UserRole;
-}
-
-@InputType()
-export class LoginInput extends PickType(User, ['email', 'password']) {}
-@ObjectType()
-export class LoginOutput extends MutationOutput {
-  @Field(() => String, { nullable: true })
-  token?: string;
 }

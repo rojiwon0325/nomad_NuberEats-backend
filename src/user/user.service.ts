@@ -46,4 +46,8 @@ export class UserService {
       return { ok: false, error: '로그인에 실패하였습니다.' };
     }
   }
+
+  async findById(id: number): Promise<User> {
+    return this.userRepository.findOne(id);
+  }
 }

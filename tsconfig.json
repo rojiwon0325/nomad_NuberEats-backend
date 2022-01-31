@@ -11,8 +11,9 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths":{
-      "@common/*":["src/common/*"],
+      "@global/*":["src/global/*"],
       "@user/*":["src/user/*"],
+      "@jwt/*":["src/jwt/*"],
     },
     "incremental": true,
     "skipLibCheck": true,

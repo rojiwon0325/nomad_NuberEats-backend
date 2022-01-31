@@ -5,10 +5,10 @@ import {
   PickType,
   registerEnumType,
 } from '@nestjs/graphql';
-import { CoreEntity } from '@common/entity/core.entity';
+import { CoreEntity } from '@global/global.entity';
 import { Column, Entity } from 'typeorm';
 import { IsString, IsEnum, IsEmail } from 'class-validator';
-import { MutationOutput } from '@common/common.dto';
+import { MutationOutput } from '@global/global.dto';
 
 enum UserRole {
   Client = 'client',
@@ -23,12 +23,12 @@ registerEnumType(UserRole, { name: 'UserRole' });
 @ObjectType()
 @Entity()
 export class User extends CoreEntity {
-  @Column()
+  @Column({ unique: true })
   @IsEmail()
   @Field(() => String)
   email: string;
 
-  @Column()
+  @Column({ unique: true })
   @IsString()
   @Field(() => String)
   username: string;

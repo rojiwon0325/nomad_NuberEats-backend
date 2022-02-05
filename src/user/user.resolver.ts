@@ -7,6 +7,7 @@ import {
   UserProfileInput,
   UserProfileOutput,
   CreateAccountInput,
+  VerifyEmailInput,
 } from './user.dto';
 import { UserService } from './user.service';
 import { User } from './entity/user.entity';
@@ -46,16 +47,7 @@ export class UserResolver {
   async userProfile(
     @Args() userProfileInput: UserProfileInput,
   ): Promise<UserProfileOutput> {
-    try {
-      const user = await this.userService.findById(userProfileInput.id);
-      if (user) {
-        return { ok: true, user };
-      } else {
-        return { ok: false, error: '존재하지 않는 사용자입니다.' };
-      }
-    } catch (e) {
-      return { ok: false, error: '정보를 불러오지 못했습니다.' };
-    }
+    return this.userService.findById(userProfileInput.id);
   }
 
   @UseGuards(AuthGuard)
@@ -64,10 +56,11 @@ export class UserResolver {
     @AuthUser() authUser: User,
     @Args() edit: EditProfileInput,
   ): Promise<CoreOutput> {
-    try {
-      await this.userService.editProfile(authUser.id, edit);
-      return { ok: true };
-    } catch (e) {}
-    return { ok: false };
+    return this.userService.editProfile(authUser.id, edit);
+  }
+
+  @Mutation(() => CoreOutput)
+  async verifyEmail(@Args() { code }: VerifyEmailInput): Promise<CoreOutput> {
+    return this.userService.verifyEmail(code);
   }
 }

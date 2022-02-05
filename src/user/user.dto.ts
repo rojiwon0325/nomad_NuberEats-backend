@@ -8,6 +8,7 @@ import {
   PickType,
 } from '@nestjs/graphql';
 import { User } from './entity/user.entity';
+import { Verification } from './entity/verification.entity';
 
 @InputType()
 export class CreateAccountInput extends PickType(User, [
@@ -47,3 +48,9 @@ class EditProfileInputType extends PickType(PartialType(User), [
 
 @ArgsType()
 export class EditProfileInput extends EditProfileInputType {}
+
+@InputType()
+class VerifyEmailInputType extends PickType(Verification, ['code']) {}
+
+@ArgsType()
+export class VerifyEmailInput extends VerifyEmailInputType {}

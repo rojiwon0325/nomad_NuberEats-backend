@@ -40,4 +40,8 @@ export class User extends CoreEntity {
   @IsEnum(UserRole)
   @Field(() => UserRole)
   role: UserRole;
+
+  @Column({ default: false })
+  @Field(() => Boolean)
+  verified: boolean;
 }

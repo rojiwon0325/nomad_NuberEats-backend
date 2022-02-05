@@ -15,7 +15,10 @@ import { JwtModule } from './jwt/jwt.module';
 import { JwtMiddleware } from '@jwt/jwt.middleware';
 import { AuthModule } from './auth/auth.module';
 import { Verification } from '@user/entity/verification.entity';
-
+import { MailerModule } from '@nestjs-modules/mailer';
+import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
+import { MailModule } from './mail/mail.module';
+import * as path from 'path';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -30,6 +33,10 @@ import { Verification } from '@user/entity/verification.entity';
         DB_PASSWORD: Joi.string().required(),
         DB_DATABASE: Joi.string().required(),
         PRIVATE_KEY: Joi.string().required(),
+        EMAIL_EMAIL: Joi.string().required(),
+        EMAIL_PASS: Joi.string().required(),
+        EMAIL_HOST: Joi.string().required(),
+        EMAIL_USER: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
@@ -47,10 +54,24 @@ import { Verification } from '@user/entity/verification.entity';
       autoSchemaFile: true,
       context: ({ req }) => ({ user: req['user'] }),
     }),
+    MailerModule.forRoot({
+      transport: `smtps://${process.env.EMAIL_EMAIL}:${process.env.EMAIL_PASS}@${process.env.EMAIL_HOST}`,
+      defaults: {
+        from: `"${process.env.EMAIL_USER}" <${process.env.EMAIL_EMAIL}>`,
+      },
+      template: {
+        dir: path.join(__dirname, '/templates/'),
+        adapter: new EjsAdapter(),
+        options: {
+          strict: true,
+        },
+      },
+    }),
     JwtModule.forRoot({ privateKey: process.env.PRIVATE_KEY }),
     UserModule,
     GlobalModule,
     AuthModule,
+    MailModule,
   ],
   controllers: [],
   providers: [],

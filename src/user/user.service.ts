@@ -12,6 +12,7 @@ import { User } from './entity/user.entity';
 import { Verification } from './entity/verification.entity';
 import { CoreOutput } from '@global/global.dto';
 import { JwtService } from '@jwt/jwt.service';
+import { MailService } from '@mail/mail.service';
 
 @Injectable()
 export class UserService {
@@ -20,6 +21,7 @@ export class UserService {
     @InjectRepository(Verification)
     private readonly verification: Repository<Verification>,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
   async createAccount({
     email,
@@ -34,7 +36,10 @@ export class UserService {
       const user = await this.userRepository.save(
         this.userRepository.create({ email, password, role }),
       );
-      await this.verification.save(this.verification.create({ user }));
+      const { code } = await this.verification.save(
+        this.verification.create({ user }),
+      );
+      this.mailService.verify(user.email, code);
       return { ok: true };
     } catch {
       return { error: '계정을 생성하지 못했습니다.', ok: false };
@@ -87,7 +92,10 @@ export class UserService {
       if (edit.email) {
         user.email = edit.email;
         user.verified = false;
-        await this.verification.save(this.verification.create({ user }));
+        const { code } = await this.verification.save(
+          this.verification.create({ user }),
+        );
+        this.mailService.verify(edit.email, code);
       }
       return { ok: true };
     } catch (e) {}

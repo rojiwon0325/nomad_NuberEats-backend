@@ -15,6 +15,7 @@
       "@user/*":["src/user/*"],
       "@jwt/*":["src/jwt/*"],
       "@auth/*":["src/auth/*"],
+      "@mail/*":["src/mail/*"],
     },
     "incremental": true,
     "skipLibCheck": true,

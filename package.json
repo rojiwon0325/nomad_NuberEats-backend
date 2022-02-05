@@ -81,6 +81,23 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper":{
+      "^@global/(.*)$":"<rootDir>/global/$1",
+      "^@user/(.*)$":"<rootDir>/user/$1",
+      "^@jwt/(.*)$":"<rootDir>/jwt/$1",
+      "^@auth/(.*)$":"<rootDir>/auth/$1",
+      "^@mail/(.*)$":"<rootDir>/mail/$1"
+    },
+    "coveragePathIgnorePatterns":[
+      "auth",
+      "restaurant",
+      "main.ts",
+      ".entity.ts",
+      ".constant.ts",
+      ".interface.ts",
+      ".dto.ts",
+      ".module.ts"
+    ]
   }
 }

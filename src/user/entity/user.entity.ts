@@ -8,7 +8,7 @@ import { CoreEntity } from '@global/global.entity';
 import { Column, Entity } from 'typeorm';
 import { IsString, IsEnum, IsEmail } from 'class-validator';
 
-enum UserRole {
+export enum UserRole {
   Client = 'client',
   Owner = 'owner',
   Delivery = 'delivery',

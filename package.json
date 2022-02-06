@@ -83,6 +83,7 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "moduleNameMapper":{
+      "^src/(.*)$":"<rootDir>/$1",
       "^@global/(.*)$":"<rootDir>/global/$1",
       "^@user/(.*)$":"<rootDir>/user/$1",
       "^@jwt/(.*)$":"<rootDir>/jwt/$1",

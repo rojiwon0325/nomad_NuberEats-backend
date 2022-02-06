@@ -31,18 +31,31 @@ export class UserService {
     try {
       const exist = await this.userRepository.findOne({ email });
       if (exist) {
-        return { error: '이미 존재하는 이메일입니다.', ok: false };
+        return { ok: false, error: '이미 존재하는 이메일입니다.' };
       }
       const user = await this.userRepository.save(
         this.userRepository.create({ email, password, role }),
       );
+      const { error } = await this.sendVerification(user);
+      return { ok: true, error };
+    } catch {
+      return { ok: false, error: '계정을 생성하지 못했습니다.' };
+    }
+  }
+
+  async sendVerification(user: User): Promise<CoreOutput> {
+    try {
       const { code } = await this.verification.save(
         this.verification.create({ user }),
       );
       this.mailService.verify(user.email, code);
       return { ok: true };
     } catch {
-      return { error: '계정을 생성하지 못했습니다.', ok: false };
+      await this.verification.delete({ user });
+      return {
+        ok: false,
+        error: '인증메일 전송에 실패하였습니다. 이메일을 인증해 주세요.',
+      };
     }
   }
 
@@ -67,14 +80,10 @@ export class UserService {
 
   async findById(id: number): Promise<UserProfileOutput> {
     try {
-      const user = await this.userRepository.findOne(id);
-      if (user) {
-        return { ok: true, user };
-      } else {
-        return { ok: false, error: '존재하지 않는 사용자입니다.' };
-      }
-    } catch (e) {
-      return { ok: false, error: '정보를 불러오지 못했습니다.' };
+      const user = await this.userRepository.findOneOrFail(id);
+      return { ok: true, user };
+    } catch {
+      return { ok: false, error: '사용자를 찾지 못했습니다.' };
     }
   }
 
@@ -85,37 +94,36 @@ export class UserService {
     //entity를 사용하려면 수정된 user를 통째로
     //save함수에 넣어서 실행해야 함, ex) save(updatedUser);
     try {
-      const user = await this.userRepository.findOne(id);
+      const user = await this.userRepository.findOneOrFail(id);
+      if (edit.email && (user.email !== edit.email || !user.verified)) {
+        user.email = edit.email;
+        user.verified = false;
+        const { error } = await this.sendVerification(user);
+        if (error) {
+          throw Error();
+        }
+      }
       if (edit.username) {
         user.username = edit.username;
       }
-      if (edit.email) {
-        user.email = edit.email;
-        user.verified = false;
-        const { code } = await this.verification.save(
-          this.verification.create({ user }),
-        );
-        this.mailService.verify(edit.email, code);
-      }
+      await this.userRepository.save(user);
       return { ok: true };
-    } catch (e) {}
-    return { ok: false, error: '변경사항이 적용되지 않았습니다.' };
+    } catch {
+      return { ok: false, error: '변경사항이 적용되지 않았습니다.' };
+    }
   }
 
   async verifyEmail(code: string): Promise<CoreOutput> {
     try {
-      const verify = await this.verification.findOne(
+      const verify = await this.verification.findOneOrFail(
         { code },
         { relations: ['user'] },
       );
-      if (verify) {
-        verify.user.verified = true;
-        await this.userRepository.save(verify.user);
-        await this.verification.delete(verify.id);
-        return { ok: true };
-      }
-      return { ok: false, error: '인증정보를 불러오지 못했습니다.' };
-    } catch (error) {
+      verify.user.verified = true;
+      await this.userRepository.save(verify.user);
+      await this.verification.delete(verify.id);
+      return { ok: true };
+    } catch {
       return { ok: false, error: '인증에 실패하였습니다.' };
     }
   }

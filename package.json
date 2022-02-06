@@ -97,7 +97,8 @@
       ".constant.ts",
       ".interface.ts",
       ".dto.ts",
-      ".module.ts"
+      ".module.ts",
+      ".resolver.ts"
     ]
   }
 }

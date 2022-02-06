@@ -91,15 +91,15 @@
     },
     "coveragePathIgnorePatterns":[
       "auth",
-      "restaurant",
       "main.ts",
-      ".entity.ts",
-      ".constant.ts",
-      ".interface.ts",
-      ".decorator.ts",
       ".dto.ts",
       ".module.ts",
+      ".entity.ts",
+      "restaurant",
       ".resolver.ts",
+      ".constant.ts",
+      ".decorator.ts",
+      ".interface.ts",
       ".middleware.ts"
     ]
   }

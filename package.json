@@ -90,12 +90,12 @@
       "^@mail/(.*)$":"<rootDir>/mail/$1"
     },
     "coveragePathIgnorePatterns":[
-      "auth",
       "main.ts",
-      ".dto.ts",
-      ".module.ts",
-      ".entity.ts",
+      "auth",
       "restaurant",
+      ".dto.ts",
+      ".entity.ts",
+      ".module.ts",
       ".resolver.ts",
       ".constant.ts",
       ".decorator.ts",

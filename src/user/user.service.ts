@@ -54,7 +54,7 @@ export class UserService {
       await this.verification.delete({ user });
       return {
         ok: false,
-        error: '인증메일 전송에 실패하였습니다. 이메일을 인증해 주세요.',
+        error: '인증메일 전송에 실패하였습니다.',
       };
     }
   }

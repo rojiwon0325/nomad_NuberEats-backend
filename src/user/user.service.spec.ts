@@ -64,10 +64,6 @@ describe('UserService', () => {
       password: '',
       role: UserRole.Client,
     };
-    const verification = {
-      code: '1234',
-      user: createAccountArg,
-    };
     it('should fail if user exists', async () => {
       userRepository.findOne.mockResolvedValue({
         id: 100,
@@ -83,28 +79,15 @@ describe('UserService', () => {
       userRepository.findOne.mockResolvedValue(undefined);
       userRepository.create.mockReturnValue(createAccountArg);
       userRepository.save.mockResolvedValue(createAccountArg);
-      verificationRepository.create.mockReturnValue(verification);
-      verificationRepository.save.mockResolvedValue(verification);
+      jest
+        .spyOn(service, 'sendVerification')
+        .mockImplementation(async () => ({ ok: true }));
       const result = await service.createAccount(createAccountArg);
       expect(userRepository.create).toHaveBeenCalledTimes(1);
       expect(userRepository.create).toHaveBeenCalledWith(createAccountArg);
 
       expect(userRepository.save).toHaveBeenCalledTimes(1);
       expect(userRepository.save).toHaveBeenCalledWith(createAccountArg);
-
-      expect(verificationRepository.create).toHaveBeenCalledTimes(1);
-      expect(verificationRepository.create).toHaveBeenCalledWith({
-        user: createAccountArg,
-      });
-
-      expect(verificationRepository.save).toHaveBeenCalledTimes(1);
-      expect(verificationRepository.save).toHaveBeenCalledWith(verification);
-
-      expect(mailService.verify).toHaveBeenCalledTimes(1);
-      expect(mailService.verify).toHaveBeenCalledWith(
-        createAccountArg.email,
-        verification.code,
-      );
 
       expect(result).toEqual({ ok: true });
     });
@@ -197,10 +180,10 @@ describe('UserService', () => {
       const args = {
         email: 'new@test.com',
       };
-      const verification = { code: '1234', user: { email: 'new@test.com' } };
       userRepository.findOneOrFail.mockResolvedValue(oldUser);
-      verificationRepository.create.mockReturnValue(verification);
-      verificationRepository.save.mockResolvedValue(verification);
+      jest
+        .spyOn(service, 'sendVerification')
+        .mockImplementation(async () => ({ ok: true }));
       const result = await service.editProfile(oldUser.id, args);
       expect(result).toEqual({ ok: true });
       expect(userRepository.save).toHaveBeenCalledWith({
@@ -215,6 +198,10 @@ describe('UserService', () => {
         email: 'new@test.com',
       };
       userRepository.findOneOrFail.mockResolvedValue(oldUser);
+      jest.spyOn(service, 'sendVerification').mockImplementation(async () => ({
+        ok: false,
+        error: '변경사항이 적용되지 않았습니다.',
+      }));
       const result = await service.editProfile(oldUser.id, args);
       expect(result).toEqual({
         ok: false,
@@ -237,7 +224,7 @@ describe('UserService', () => {
     });
   });
 
-  describe('veriitEmail', () => {
+  describe('verifyEmail', () => {
     const mockedToken = { code: '', id: 10, user: { verified: false } };
     beforeEach(() => {
       mockedToken.code = '1234';
@@ -257,6 +244,45 @@ describe('UserService', () => {
       expect(userRepository.save).toHaveBeenCalledTimes(0);
       expect(verificationRepository.delete).toHaveBeenCalledTimes(0);
       expect(result).toEqual({ ok: false, error: '인증에 실패하였습니다.' });
+    });
+  });
+
+  describe('sendVerification', () => {
+    const mockedUser: User = {
+      email: 'test@test.com',
+      username: 'test',
+      id: 1,
+      role: UserRole.Client,
+      password: '1234',
+      verified: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const mockedCode = '1234';
+    it('should fail on exception', async () => {
+      verificationRepository.create.mockReturnValue({ user: mockedUser });
+      verificationRepository.save.mockRejectedValue(new Error());
+      const result = await service.sendVerification(mockedUser);
+      expect(mailService.verify).toHaveBeenCalledTimes(0);
+      expect(verificationRepository.delete).toHaveBeenCalledTimes(1);
+      expect(verificationRepository.delete).toHaveBeenCalledWith({
+        user: mockedUser,
+      });
+      expect(result).toEqual({
+        ok: false,
+        error: '인증메일 전송에 실패하였습니다.',
+      });
+    });
+    it('should send verification', async () => {
+      verificationRepository.create.mockReturnValue({ user: mockedUser });
+      verificationRepository.save.mockResolvedValue({ code: mockedCode });
+      const result = await service.sendVerification(mockedUser);
+      expect(mailService.verify).toHaveBeenCalledTimes(1);
+      expect(mailService.verify).toHaveBeenCalledWith(
+        mockedUser.email,
+        mockedCode,
+      );
+      expect(result).toEqual({ ok: true });
     });
   });
 });

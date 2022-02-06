@@ -96,9 +96,11 @@
       ".entity.ts",
       ".constant.ts",
       ".interface.ts",
+      ".decorator.ts",
       ".dto.ts",
       ".module.ts",
-      ".resolver.ts"
+      ".resolver.ts",
+      ".middleware.ts"
     ]
   }
 }

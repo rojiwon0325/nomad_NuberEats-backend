@@ -1,8 +1,9 @@
-import { NestMiddleware } from '@nestjs/common';
+import { Injectable, NestMiddleware } from '@nestjs/common';
 import { UserService } from '@user/user.service';
 import { NextFunction, Request, Response } from 'express';
 import { JwtService } from './jwt.service';
 
+@Injectable()
 export class JwtMiddleware implements NestMiddleware {
   constructor(
     private readonly jwtService: JwtService,
@@ -15,7 +16,9 @@ export class JwtMiddleware implements NestMiddleware {
       const decoded = this.jwtService.verify(token.toString());
       const user = await this.userService.findById(decoded['id']);
       req['user'] = user;
-    } catch (e) {}
+    } catch {
+      // access_token isn't
+    }
     next();
   }
 }

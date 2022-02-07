@@ -148,4 +148,27 @@ describe('UserModule (e2e)', () => {
         });
     });
   });
+
+  describe('me', () => {
+    const query = '{ me { email } }';
+    it('should see my profile', () => {
+      return request(app.getHttpServer())
+        .post('/graphql')
+        .set('access_token', jwToken)
+        .send({ query })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.data.me).toEqual({ email: testuser.email });
+        });
+    });
+    it('should fail to see my profile', () => {
+      return request(app.getHttpServer())
+        .post('/graphql')
+        .send({ query })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.errors[0]?.message).toBe('Forbidden resource');
+        });
+    });
+  });
 });

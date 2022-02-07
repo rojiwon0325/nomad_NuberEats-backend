@@ -14,7 +14,7 @@ export class JwtMiddleware implements NestMiddleware {
     try {
       const token = req.headers['access_token'];
       const decoded = this.jwtService.verify(token.toString());
-      const user = await this.userService.findById(decoded['id']);
+      const { user } = await this.userService.findById(decoded['id']);
       req['user'] = user;
     } catch {
       // access_token isn't

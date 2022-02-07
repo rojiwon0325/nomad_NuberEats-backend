@@ -48,10 +48,18 @@ class EditProfileInputType extends PickType(PartialType(User), [
 // PickType에 PartialType 인자로 넣기 o
 
 @ArgsType()
-export class EditProfileInput extends EditProfileInputType {}
+export class EditProfileInput {
+  @Field(() => String, { nullable: true })
+  email?: string;
+  @Field(() => String, { nullable: true })
+  username?: string;
+}
 
 @InputType()
 class VerifyEmailInputType extends PickType(Verification, ['code']) {}
 
 @ArgsType()
-export class VerifyEmailInput extends VerifyEmailInputType {}
+export class VerifyEmailInput {
+  @Field(() => String, { nullable: true })
+  code?: string;
+}

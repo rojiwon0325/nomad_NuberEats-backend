@@ -5,6 +5,7 @@ import { AppModule } from '../src/app.module';
 import { getConnection, Repository } from 'typeorm';
 import { User } from '@user/entity/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { Verification } from '@user/entity/verification.entity';
 
 const testuser = {
   email: 'bond9986@test.com',
@@ -14,6 +15,7 @@ const testuser = {
 describe('UserModule (e2e)', () => {
   let app: INestApplication;
   let userRepository: Repository<User>;
+  let verificationRepository: Repository<Verification>;
   let jwToken: string;
 
   beforeAll(async () => {
@@ -23,6 +25,9 @@ describe('UserModule (e2e)', () => {
 
     app = module.createNestApplication();
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    verificationRepository = module.get<Repository<Verification>>(
+      getRepositoryToken(Verification),
+    );
     await app.init();
   });
   afterAll(async () => {
@@ -168,6 +173,87 @@ describe('UserModule (e2e)', () => {
         .expect(200)
         .expect((res) => {
           expect(res.body.errors[0]?.message).toBe('Forbidden resource');
+        });
+    });
+  });
+
+  describe('editProfile', () => {
+    const query = 'mutation{ editProfile(email:"nico@las.com") { ok error } }';
+    it('should change email', () => {
+      return request(app.getHttpServer())
+        .post('/graphql')
+        .set('access_token', jwToken)
+        .send({ query })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: { editProfile },
+            },
+          } = res;
+          const { ok, error } = editProfile;
+          expect(ok).toBe(true);
+          expect(error).toBe(null);
+        });
+    });
+    it('should fail to change email if the email is existing', () => {
+      return request(app.getHttpServer())
+        .post('/graphql')
+        .set('access_token', jwToken)
+        .send({ query })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: { editProfile },
+            },
+          } = res;
+          const { ok, error } = editProfile;
+          expect(ok).toBe(false);
+          expect(error).toBe('이미 사용중인 이메일입니다.');
+        });
+    });
+  });
+
+  describe('verifyEmail', () => {
+    let verificationCode: string;
+    const query = (code: string) =>
+      `mutation{ verifyEmail(code:"${code}") { ok error } }`;
+    beforeAll(async () => {
+      const [verification] = await verificationRepository.find();
+      verificationCode = verification.code;
+    });
+
+    it('should verify email', () => {
+      return request(app.getHttpServer())
+        .post('/graphql')
+        .send({ query: query(verificationCode) })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: { verifyEmail },
+            },
+          } = res;
+          const { ok, error } = verifyEmail;
+          expect(ok).toBe(true);
+          expect(error).toBe(null);
+        });
+    });
+    it('should fail to verify if wrong code', () => {
+      return request(app.getHttpServer())
+        .post('/graphql')
+        .send({ query: query('wrong') })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: { verifyEmail },
+            },
+          } = res;
+          const { ok, error } = verifyEmail;
+          expect(ok).toBe(false);
+          expect(error).toBe('인증에 실패하였습니다.');
         });
     });
   });

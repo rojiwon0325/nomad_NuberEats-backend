@@ -60,8 +60,9 @@ describe('UserService', () => {
 
   describe('createAccount', () => {
     const createAccountArg = {
-      email: '',
-      password: '',
+      email: 'test@test.com',
+      username: 'testuser',
+      password: '1234',
       role: UserRole.Client,
     };
     it('should fail if user exists', async () => {
@@ -167,23 +168,27 @@ describe('UserService', () => {
       oldUser.username = 'testuser';
       oldUser.verified = true;
     });
-    it('should change email to samething', async () => {
+    it('should fail to change email if the email is existing', async () => {
       const args = {
         email: 'test@test.com',
       };
       userRepository.findOneOrFail.mockResolvedValue(oldUser);
+      userRepository.findOne.mockResolvedValue(oldUser);
       const result = await service.editProfile(oldUser.id, args);
-      expect(result).toEqual({ ok: true });
-      expect(userRepository.save).toHaveBeenCalledWith(oldUser);
+      expect(result).toEqual({
+        ok: false,
+        error: '이미 사용중인 이메일입니다.',
+      });
+      expect(userRepository.save).toHaveBeenCalledTimes(0);
     });
-    it('should change email to other email', async () => {
+    it('should change email although sendVerification fail', async () => {
       const args = {
         email: 'new@test.com',
       };
       userRepository.findOneOrFail.mockResolvedValue(oldUser);
       jest
         .spyOn(service, 'sendVerification')
-        .mockImplementation(async () => ({ ok: true }));
+        .mockImplementation(async () => ({ ok: false }));
       const result = await service.editProfile(oldUser.id, args);
       expect(result).toEqual({ ok: true });
       expect(userRepository.save).toHaveBeenCalledWith({
@@ -191,21 +196,6 @@ describe('UserService', () => {
         email: 'new@test.com',
         username: 'testuser',
         verified: false,
-      });
-    });
-    it('should change email to other email but fail at sendVerification', async () => {
-      const args = {
-        email: 'new@test.com',
-      };
-      userRepository.findOneOrFail.mockResolvedValue(oldUser);
-      jest.spyOn(service, 'sendVerification').mockImplementation(async () => ({
-        ok: false,
-        error: '변경사항이 적용되지 않았습니다.',
-      }));
-      const result = await service.editProfile(oldUser.id, args);
-      expect(result).toEqual({
-        ok: false,
-        error: '변경사항이 적용되지 않았습니다.',
       });
     });
     it('should change username', async () => {
@@ -278,6 +268,7 @@ describe('UserService', () => {
       verificationRepository.save.mockResolvedValue({ code: mockedCode });
       const result = await service.sendVerification(mockedUser);
       expect(mailService.verify).toHaveBeenCalledTimes(1);
+      expect(verificationRepository.delete).toHaveBeenCalledTimes(1);
       expect(mailService.verify).toHaveBeenCalledWith(
         mockedUser.email,
         mockedCode,

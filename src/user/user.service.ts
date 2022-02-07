@@ -46,13 +46,13 @@ export class UserService {
 
   async sendVerification(user: User): Promise<CoreOutput> {
     try {
+      await this.verification.delete({ user });
       const { code } = await this.verification.save(
         this.verification.create({ user }),
       );
       this.mailService.verify(user.email, code);
       return { ok: true };
     } catch {
-      await this.verification.delete({ user });
       return {
         ok: false,
         error: '인증메일 전송에 실패하였습니다.',
@@ -96,13 +96,16 @@ export class UserService {
     //save함수에 넣어서 실행해야 함, ex) save(updatedUser);
     try {
       const user = await this.userRepository.findOneOrFail(id);
-      if (edit.email && (user.email !== edit.email || !user.verified)) {
+      if (edit.email) {
+        const existed = await this.userRepository.findOne({
+          email: edit.email,
+        });
+        if (existed) {
+          return { ok: false, error: '이미 사용중인 이메일입니다.' };
+        }
         user.email = edit.email;
         user.verified = false;
-        const { error } = await this.sendVerification(user);
-        if (error) {
-          throw Error();
-        }
+        await this.sendVerification(user);
       }
       if (edit.username) {
         user.username = edit.username;

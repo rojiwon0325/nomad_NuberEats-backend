@@ -25,6 +25,7 @@ export class UserService {
   ) {}
   async createAccount({
     email,
+    username,
     password,
     role,
   }: CreateAccountInput): Promise<CoreOutput> {
@@ -34,7 +35,7 @@ export class UserService {
         return { ok: false, error: '이미 존재하는 이메일입니다.' };
       }
       const user = await this.userRepository.save(
-        this.userRepository.create({ email, password, role }),
+        this.userRepository.create({ email, username, password, role }),
       );
       const { error } = await this.sendVerification(user);
       return { ok: true, error };

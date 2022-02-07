@@ -13,6 +13,7 @@ import { Verification } from './entity/verification.entity';
 @InputType()
 export class CreateAccountInput extends PickType(User, [
   'email',
+  'username',
   'password',
   'role',
 ]) {}

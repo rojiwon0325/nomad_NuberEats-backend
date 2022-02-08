@@ -212,6 +212,18 @@ describe('UserService', () => {
         verified: true,
       });
     });
+    it('should fail to change if user not found', async () => {
+      const args = {
+        username: 'newname',
+      };
+      userRepository.findOneOrFail.mockRejectedValue(new Error());
+      const result = await service.editProfile(oldUser.id, args);
+      expect(result).toEqual({
+        ok: false,
+        error: '변경사항이 적용되지 않았습니다.',
+      });
+      expect(userRepository.save).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe('verifyEmail', () => {

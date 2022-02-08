@@ -18,6 +18,13 @@ describe('UserModule (e2e)', () => {
   let verificationRepository: Repository<Verification>;
   let jwToken: string;
 
+  const baseTest = () => request(app.getHttpServer()).post('/graphql');
+  const publicTest = (query: string) => baseTest().send({ query });
+  const privateTest = (query: string, token: string) =>
+    baseTest()
+      .set('authorization', 'Bearer ' + token)
+      .send({ query });
+
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -36,7 +43,7 @@ describe('UserModule (e2e)', () => {
   });
 
   describe('createAccount', () => {
-    const mutation = `mutation{ 
+    const query = `mutation{ 
       createAccount(user:{
         email:"${testuser.email}",
         username: "testuser",
@@ -44,9 +51,7 @@ describe('UserModule (e2e)', () => {
         role: Owner 
       }) { ok error }}`;
     it('should create account', () => {
-      return request(app.getHttpServer())
-        .post('/graphql')
-        .send({ query: mutation })
+      return publicTest(query)
         .expect(200)
         .expect((res) => {
           expect(res.body.data.createAccount.ok).toBe(true);
@@ -54,9 +59,7 @@ describe('UserModule (e2e)', () => {
         });
     });
     it('should fail if account already exists', () => {
-      return request(app.getHttpServer())
-        .post('/graphql')
-        .send({ query: mutation })
+      return publicTest(query)
         .expect(200)
         .expect((res) => {
           expect(res.body.data.createAccount.ok).toBe(false);
@@ -74,9 +77,7 @@ describe('UserModule (e2e)', () => {
         password: "${password}",
       }) { ok error token }}`;
     it('should login with correct credentials', () => {
-      return request(app.getHttpServer())
-        .post('/graphql')
-        .send({ query: query(testuser.password) })
+      return publicTest(query(testuser.password))
         .expect(200)
         .expect((res) => {
           const {
@@ -91,9 +92,7 @@ describe('UserModule (e2e)', () => {
         });
     });
     it('should fail to login with wrong credentials', () => {
-      return request(app.getHttpServer())
-        .post('/graphql')
-        .send({ query: query(testuser.password + 'wrong') })
+      return publicTest(query(testuser.password + 'wrong'))
         .expect(200)
         .expect((res) => {
           const {
@@ -117,10 +116,7 @@ describe('UserModule (e2e)', () => {
       userId = user.id;
     });
     it('should see a profile', () => {
-      return request(app.getHttpServer())
-        .post('/graphql')
-        .set('access_token', jwToken)
-        .send({ query: query(userId) })
+      return privateTest(query(userId), jwToken)
         .expect(200)
         .expect((res) => {
           const {
@@ -135,10 +131,7 @@ describe('UserModule (e2e)', () => {
         });
     });
     it('should fail to see a profile', () => {
-      return request(app.getHttpServer())
-        .post('/graphql')
-        .set('access_token', jwToken)
-        .send({ query: query(userId + 100) })
+      return privateTest(query(userId + 100), jwToken)
         .expect(200)
         .expect((res) => {
           const {
@@ -157,19 +150,14 @@ describe('UserModule (e2e)', () => {
   describe('me', () => {
     const query = '{ me { email } }';
     it('should see my profile', () => {
-      return request(app.getHttpServer())
-        .post('/graphql')
-        .set('access_token', jwToken)
-        .send({ query })
+      return privateTest(query, jwToken)
         .expect(200)
         .expect((res) => {
           expect(res.body.data.me).toEqual({ email: testuser.email });
         });
     });
     it('should fail to see my profile', () => {
-      return request(app.getHttpServer())
-        .post('/graphql')
-        .send({ query })
+      return publicTest(query)
         .expect(200)
         .expect((res) => {
           expect(res.body.errors[0]?.message).toBe('Forbidden resource');
@@ -180,10 +168,7 @@ describe('UserModule (e2e)', () => {
   describe('editProfile', () => {
     const query = 'mutation{ editProfile(email:"nico@las.com") { ok error } }';
     it('should change email', () => {
-      return request(app.getHttpServer())
-        .post('/graphql')
-        .set('access_token', jwToken)
-        .send({ query })
+      return privateTest(query, jwToken)
         .expect(200)
         .expect((res) => {
           const {
@@ -197,10 +182,7 @@ describe('UserModule (e2e)', () => {
         });
     });
     it('should fail to change email if the email is existing', () => {
-      return request(app.getHttpServer())
-        .post('/graphql')
-        .set('access_token', jwToken)
-        .send({ query })
+      return privateTest(query, jwToken)
         .expect(200)
         .expect((res) => {
           const {
@@ -225,9 +207,7 @@ describe('UserModule (e2e)', () => {
     });
 
     it('should verify email', () => {
-      return request(app.getHttpServer())
-        .post('/graphql')
-        .send({ query: query(verificationCode) })
+      return publicTest(query(verificationCode))
         .expect(200)
         .expect((res) => {
           const {
@@ -241,9 +221,7 @@ describe('UserModule (e2e)', () => {
         });
     });
     it('should fail to verify if wrong code', () => {
-      return request(app.getHttpServer())
-        .post('/graphql')
-        .send({ query: query('wrong') })
+      return publicTest(query('wrong'))
         .expect(200)
         .expect((res) => {
           const {

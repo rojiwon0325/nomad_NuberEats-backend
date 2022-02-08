@@ -1,6 +1,7 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, OneToMany } from 'typeorm';
-import { IsString } from 'class-validator';
+import { IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 import { CoreEntity } from '@global/global.entity';
 import { Restaurant } from './restaurant.entity';
 
@@ -9,7 +10,7 @@ import { Restaurant } from './restaurant.entity';
 @Entity()
 export class Category extends CoreEntity {
   @Field(() => String)
-  @Column()
+  @Column({ unique: true })
   @IsString()
   name: string;
 
@@ -20,5 +21,7 @@ export class Category extends CoreEntity {
 
   @Field(() => [Restaurant])
   @OneToMany(() => Restaurant, (restaurant) => restaurant.category)
+  @ValidateNested({ each: true })
+  @Type(() => Restaurant)
   restaurants: Restaurant[];
 }

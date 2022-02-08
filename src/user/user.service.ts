@@ -81,7 +81,7 @@ export class UserService {
 
   async findById(id: number): Promise<UserProfileOutput> {
     try {
-      const user = await this.userRepository.findOneOrFail(id);
+      const user = await this.userRepository.findOneOrFail({ id });
       return { ok: true, user };
     } catch {
       return { ok: false, error: '사용자를 찾지 못했습니다.' };
@@ -95,7 +95,7 @@ export class UserService {
     //entity를 사용하려면 수정된 user를 통째로
     //save함수에 넣어서 실행해야 함, ex) save(updatedUser);
     try {
-      const user = await this.userRepository.findOneOrFail(id);
+      const user = await this.userRepository.findOneOrFail({ id });
       if (edit.email) {
         const existed = await this.userRepository.findOne({
           email: edit.email,

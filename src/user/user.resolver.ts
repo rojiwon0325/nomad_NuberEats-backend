@@ -11,18 +11,12 @@ import {
 } from './user.dto';
 import { UserService } from './user.service';
 import { User } from './entity/user.entity';
-import { UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@auth/auth.guard';
 import { AuthUser } from '@auth/auth.decorator';
+import { Role } from '@auth/role.decorator';
 
 @Resolver()
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
-
-  @Query(() => Boolean)
-  test() {
-    return true;
-  }
 
   @Mutation(() => CoreOutput)
   createAccount(
@@ -36,13 +30,13 @@ export class UserResolver {
     return this.userService.login(loginInput);
   }
 
-  @UseGuards(AuthGuard)
+  @Role(['Any'])
   @Query(() => User, { nullable: true })
   me(@AuthUser() authUser: User): User | undefined {
     return authUser;
   }
 
-  @UseGuards(AuthGuard)
+  @Role(['Any'])
   @Query(() => UserProfileOutput)
   async userProfile(
     @Args() userProfileInput: UserProfileInput,
@@ -50,7 +44,7 @@ export class UserResolver {
     return this.userService.findById(userProfileInput.id);
   }
 
-  @UseGuards(AuthGuard)
+  @Role(['Any'])
   @Mutation(() => CoreOutput)
   async editProfile(
     @AuthUser() authUser: User,

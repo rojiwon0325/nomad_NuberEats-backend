@@ -1,6 +1,7 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, ManyToOne } from 'typeorm';
-import { IsString, Length } from 'class-validator';
+import { Column, Entity, ManyToOne, RelationId } from 'typeorm';
+import { IsString, Length, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 import { CoreEntity } from '@global/global.entity';
 import { User } from '@user/entity/user.entity';
 import { Category } from './category.entity';
@@ -10,7 +11,7 @@ import { Category } from './category.entity';
 @Entity()
 export class Restaurant extends CoreEntity {
   @Field(() => String)
-  @Column()
+  @Column({ unique: true })
   @IsString()
   @Length(5)
   name: string;
@@ -34,5 +35,10 @@ export class Restaurant extends CoreEntity {
 
   @Field(() => User)
   @ManyToOne(() => User, (user) => user.restaurants, { onDelete: 'CASCADE' })
+  @ValidateNested()
+  @Type(() => User)
   owner: User;
+
+  @RelationId((restaurant: Restaurant) => restaurant.owner)
+  ownerId: number;
 }

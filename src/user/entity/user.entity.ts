@@ -6,8 +6,16 @@ import {
 } from '@nestjs/graphql';
 import { CoreEntity } from '@global/global.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
-import { IsString, IsEnum, IsEmail, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsEmail,
+  IsBoolean,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 import { Restaurant } from '@restaurant/entity/restaurant.entity';
+
 export enum UserRole {
   Client = 'client',
   Owner = 'owner',
@@ -46,7 +54,9 @@ export class User extends CoreEntity {
   @Field(() => Boolean)
   verified: boolean;
 
-  @Field(() => [Restaurant])
+  @Field(() => [Restaurant], { nullable: true })
   @OneToMany(() => Restaurant, (restaurant) => restaurant.owner)
-  restaurants: Restaurant[];
+  @ValidateNested({ each: true })
+  @Type(() => Restaurant)
+  restaurants?: Restaurant[];
 }

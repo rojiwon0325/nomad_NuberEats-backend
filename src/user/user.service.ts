@@ -103,6 +103,7 @@ export class UserService {
         if (existed) {
           return { ok: false, error: '이미 사용중인 이메일입니다.' };
         }
+        await this.verification.delete({ user });
         user.email = edit.email;
         user.verified = false;
         await this.sendVerification(user);

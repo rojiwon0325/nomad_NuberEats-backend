@@ -19,6 +19,9 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 import { MailModule } from './mail/mail.module';
 import * as path from 'path';
+import { Restaurant } from '@restaurant/entity/restaurant.entity';
+import { Category } from '@restaurant/entity/category.entity';
+import { RestaurantModule } from '@restaurant/restaurant.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -48,7 +51,7 @@ import * as path from 'path';
       database: process.env.DB_DATABASE,
       synchronize: true,
       logging: false,
-      entities: [User, Verification],
+      entities: [User, Verification, Restaurant, Category],
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
@@ -69,6 +72,7 @@ import * as path from 'path';
     }),
     JwtModule.forRoot({ privateKey: process.env.PRIVATE_KEY }),
     UserModule,
+    RestaurantModule,
     GlobalModule,
     AuthModule,
     MailModule,

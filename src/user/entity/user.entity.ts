@@ -5,9 +5,9 @@ import {
   registerEnumType,
 } from '@nestjs/graphql';
 import { CoreEntity } from '@global/global.entity';
-import { Column, Entity } from 'typeorm';
-import { IsString, IsEnum, IsEmail } from 'class-validator';
-
+import { Column, Entity, OneToMany } from 'typeorm';
+import { IsString, IsEnum, IsEmail, IsBoolean } from 'class-validator';
+import { Restaurant } from '@restaurant/entity/restaurant.entity';
 export enum UserRole {
   Client = 'client',
   Owner = 'owner',
@@ -17,7 +17,7 @@ export enum UserRole {
 
 registerEnumType(UserRole, { name: 'UserRole' });
 
-@InputType({ isAbstract: true })
+@InputType('UserInputType', { isAbstract: true })
 @ObjectType()
 @Entity()
 export class User extends CoreEntity {
@@ -42,6 +42,11 @@ export class User extends CoreEntity {
   role: UserRole;
 
   @Column({ default: false })
+  @IsBoolean()
   @Field(() => Boolean)
   verified: boolean;
+
+  @Field(() => [Restaurant])
+  @OneToMany(() => Restaurant, (restaurant) => restaurant.owner)
+  restaurants: Restaurant[];
 }

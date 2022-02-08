@@ -13,6 +13,7 @@
     "paths":{
       "@global/*":["src/global/*"],
       "@user/*":["src/user/*"],
+      "@restaurant/*":["src/restaurant/*"],
       "@jwt/*":["src/jwt/*"],
       "@auth/*":["src/auth/*"],
       "@mail/*":["src/mail/*"],

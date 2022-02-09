@@ -182,7 +182,14 @@ export class RestaurantService {
   }: SearchRestaurantInput): Promise<RestaurantsOutput> {
     try {
       const [result, totalResults] = await this.restaurant.findAndCount({
-        where: { name: ILike(`%${key}%`) },
+        where: [
+          {
+            name: ILike(`%${key}%`),
+          },
+          {
+            category: { name: ILike(`%${key}%`) },
+          },
+        ],
         take: 25,
         skip: (page - 1) * 25,
       });

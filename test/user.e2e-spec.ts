@@ -6,10 +6,16 @@ import { getConnection, Repository } from 'typeorm';
 import { User } from '@user/entity/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Verification } from '@user/entity/verification.entity';
+import { MailService } from '@mail/mail.service';
 
 const testuser = {
-  email: 'bond9986@test.com',
+  email: 'test@test.com',
   password: '1234',
+};
+
+const mockMailService = {
+  send: jest.fn(),
+  verify: jest.fn(),
 };
 
 describe('UserModule (e2e)', () => {
@@ -28,7 +34,10 @@ describe('UserModule (e2e)', () => {
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(MailService)
+      .useValue(mockMailService)
+      .compile();
 
     app = module.createNestApplication();
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
@@ -166,7 +175,7 @@ describe('UserModule (e2e)', () => {
   });
 
   describe('editProfile', () => {
-    const query = 'mutation{ editProfile(email:"nico@las.com") { ok error } }';
+    const query = `mutation{ editProfile(email:"new${testuser.email}") { ok error } }`;
     it('should change email', () => {
       return privateTest(query, jwToken)
         .expect(200)

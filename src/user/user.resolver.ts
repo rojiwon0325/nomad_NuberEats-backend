@@ -1,5 +1,5 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { CoreOutput } from '@global/global.dto';
+import { CoreOutput } from '@global/dto/global.dto';
 import {
   LoginInput,
   LoginOutput,

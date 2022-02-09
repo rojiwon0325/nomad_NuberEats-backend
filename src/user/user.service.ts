@@ -10,7 +10,7 @@ import {
 } from './user.dto';
 import { User } from './entity/user.entity';
 import { Verification } from './entity/verification.entity';
-import { CoreOutput } from '@global/global.dto';
+import { CoreOutput } from '@global/dto/global.dto';
 import { JwtService } from '@jwt/jwt.service';
 import { MailService } from '@mail/mail.service';
 

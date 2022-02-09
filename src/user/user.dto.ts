@@ -1,4 +1,4 @@
-import { CoreOutput } from '@global/global.dto';
+import { CoreOutput } from '@global/dto/global.dto';
 import {
   ArgsType,
   Field,

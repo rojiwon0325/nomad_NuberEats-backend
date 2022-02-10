@@ -27,14 +27,16 @@ export class Restaurant extends CoreEntity {
   address: string;
 
   @Field(() => Category, { nullable: true })
-  @ManyToOne(() => Category, (category) => category.restaurants, {
+  @ManyToOne(() => Category, (category) => category.restaurant, {
     nullable: true,
     onDelete: 'SET NULL',
   })
+  @ValidateNested()
+  @Type(() => Category)
   category?: Category;
 
   @Field(() => User)
-  @ManyToOne(() => User, (user) => user.restaurants, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.restaurant, { onDelete: 'CASCADE' })
   @ValidateNested()
   @Type(() => User)
   owner: User;

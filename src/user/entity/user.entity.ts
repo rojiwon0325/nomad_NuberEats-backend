@@ -58,5 +58,5 @@ export class User extends CoreEntity {
   @OneToMany(() => Restaurant, (restaurant) => restaurant.owner)
   @ValidateNested({ each: true })
   @Type(() => Restaurant)
-  restaurants?: Restaurant[];
+  restaurant?: Restaurant[];
 }

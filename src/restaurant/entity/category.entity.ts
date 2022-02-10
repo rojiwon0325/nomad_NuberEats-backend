@@ -23,5 +23,5 @@ export class Category extends CoreEntity {
   @OneToMany(() => Restaurant, (restaurant) => restaurant.category)
   @ValidateNested({ each: true })
   @Type(() => Restaurant)
-  restaurants: Restaurant[];
+  restaurant: Restaurant[];
 }

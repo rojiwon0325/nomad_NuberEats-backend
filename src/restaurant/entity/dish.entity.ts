@@ -32,6 +32,7 @@ export class Dish extends CoreEntity {
   @Field(() => Restaurant)
   @ManyToOne(() => Restaurant, (restaurant) => restaurant.menu, {
     onDelete: 'CASCADE',
+    nullable: false,
   })
   restaurant: Restaurant;
 
@@ -49,8 +50,15 @@ export class DishOption {
   @Field(() => String)
   name: string;
 
-  @Field(() => [String])
-  choice: string[];
+  @Field(() => [Choice])
+  choice: Choice[];
+}
+
+@InputType('ChoiceInputType', { isAbstract: true })
+@ObjectType()
+class Choice {
+  @Field(() => String)
+  name: string;
 
   @Field(() => Int)
   extraPrice: number;

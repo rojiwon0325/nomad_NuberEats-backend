@@ -21,6 +21,7 @@ import {
 } from './dto/category.dto';
 import { PaginationInput } from '@global/dto/pagination.dto';
 import { CreateDishInput, CreateDishOutput } from './dto/dish.dto';
+import { Dish } from './entity/dish.entity';
 
 @Injectable()
 export class RestaurantService {
@@ -29,6 +30,8 @@ export class RestaurantService {
     private readonly restaurant: Repository<Restaurant>,
     @InjectRepository(Category)
     private readonly category: Repository<Category>,
+    @InjectRepository(Dish)
+    private readonly dish: Repository<Dish>,
   ) {}
 
   async createCategory(
@@ -210,8 +213,21 @@ export class RestaurantService {
 
   async createDish(
     owner: User,
-    createDishInput: CreateDishInput,
+    { restaurantId, data }: CreateDishInput,
   ): Promise<CreateDishOutput> {
-    return { ok: true };
+    try {
+      const restaurant = await this.restaurant.findOneOrFail({
+        id: restaurantId,
+      });
+      if (owner.id !== restaurant.id) {
+        return { ok: false, error: '메뉴를 생성할 권한이 없습니다.' };
+      }
+      const dish = await this.dish.save(
+        this.dish.create({ ...data, restaurant }),
+      );
+      return { ok: true, result: dish };
+    } catch {
+      return { ok: false, error: '메뉴를 생성하지 못했습니다.' };
+    }
   }
 }

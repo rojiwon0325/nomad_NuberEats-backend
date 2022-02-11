@@ -20,6 +20,7 @@ import {
   CreateCategoryInput,
 } from './dto/category.dto';
 import { PaginationInput } from '@global/dto/pagination.dto';
+import { CreateDishInput, CreateDishOutput } from './dto/dish.dto';
 
 @Injectable()
 export class RestaurantService {
@@ -205,5 +206,12 @@ export class RestaurantService {
         error: '검색 결과를 불러오지 못했습니다.',
       };
     }
+  }
+
+  async createDish(
+    owner: User,
+    createDishInput: CreateDishInput,
+  ): Promise<CreateDishOutput> {
+    return { ok: true };
   }
 }

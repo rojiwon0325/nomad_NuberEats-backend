@@ -29,6 +29,8 @@ import {
   CreateCategoryInput,
 } from './dto/category.dto';
 import { PaginationInput } from '@global/dto/pagination.dto';
+import { Dish } from './entity/dish.entity';
+import { CreateDishInput, CreateDishOutput } from './dto/dish.dto';
 
 @Resolver(() => Restaurant)
 export class RestaurantResolver {
@@ -120,5 +122,19 @@ export class CategoryResolver {
     @Args() byNameInput: ByNameInput,
   ): Promise<CategoryOutput> {
     return this.restaurantService.findCategoryByName(byNameInput);
+  }
+}
+
+@Resolver(() => Dish)
+export class DishResolver {
+  constructor(private readonly restaurantService: RestaurantService) {}
+
+  @Mutation(() => CreateDishOutput)
+  @Role(['Owner'])
+  CreateDish(
+    @AuthUser() owner: User,
+    @Args() createDishInput: CreateDishInput,
+  ) {
+    return this.restaurantService.createDish(owner, createDishInput);
   }
 }

@@ -22,6 +22,7 @@ import * as path from 'path';
 import { Restaurant } from '@restaurant/entity/restaurant.entity';
 import { Category } from '@restaurant/entity/category.entity';
 import { RestaurantModule } from '@restaurant/restaurant.module';
+import { Dish } from '@restaurant/entity/dish.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -51,7 +52,7 @@ import { RestaurantModule } from '@restaurant/restaurant.module';
       database: process.env.DB_DATABASE,
       synchronize: true,
       logging: false,
-      entities: [User, Verification, Restaurant, Category],
+      entities: [User, Verification, Restaurant, Category, Dish],
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,

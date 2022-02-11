@@ -9,8 +9,8 @@ export class JwtService {
     @Inject(CONFIG_OPTIONS) private readonly options: JwtModuleOptions,
   ) {}
 
-  sign(id: number): string {
-    return jwt.sign({ id }, this.options.privateKey);
+  sign(id: number, ip: string): string {
+    return jwt.sign({ id, ip }, this.options.privateKey);
   }
 
   verify(token: string) {

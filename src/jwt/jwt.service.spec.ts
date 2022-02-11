@@ -32,10 +32,10 @@ describe('JwtService', () => {
   });
 
   it('sign, should return a signed token', () => {
-    const token = service.sign(TEST_ID);
+    const token = service.sign(TEST_ID, '');
     expect(typeof token).toBe('string');
     expect(jwt.sign).toHaveBeenCalledTimes(1);
-    expect(jwt.sign).toHaveBeenCalledWith({ id: TEST_ID }, TEST_KEY);
+    expect(jwt.sign).toHaveBeenCalledWith({ id: TEST_ID, ip: '' }, TEST_KEY);
   });
 
   it('verify, should return the decoded token', () => {

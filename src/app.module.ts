@@ -55,7 +55,15 @@ import { RestaurantModule } from '@restaurant/restaurant.module';
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
-      context: ({ req }) => ({ user: req['user'] }),
+      context: ({ req }) => {
+        const ip = req.ip || req.connection.remoteAddress;
+        const isMe = req['userIp'] === ip;
+        return {
+          user: isMe && req['user'],
+          ip,
+          isMe,
+        };
+      },
     }),
     MailerModule.forRoot({
       transport: `smtps://${process.env.EMAIL_EMAIL}:${process.env.EMAIL_PASS}@${process.env.EMAIL_HOST}`,

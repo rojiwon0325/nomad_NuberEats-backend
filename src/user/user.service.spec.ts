@@ -109,7 +109,7 @@ describe('UserService', () => {
     };
     it('should fail if user does not exist', async () => {
       userRepository.findOne.mockResolvedValue(null);
-      const result = await service.login(loginArgs);
+      const result = await service.login(loginArgs, '');
       expect(userRepository.findOne).toHaveBeenCalledTimes(1);
       expect(userRepository.findOne).toHaveBeenCalledWith(
         { email: loginArgs.email },
@@ -120,7 +120,7 @@ describe('UserService', () => {
     it('should fail if the password is wrong', async () => {
       const mockedUser = { id: 1, password: '1234' };
       userRepository.findOne.mockResolvedValue(mockedUser);
-      const result = await service.login(loginArgs);
+      const result = await service.login(loginArgs, '');
       expect(result).toEqual({
         ok: false,
         error: '계정 정보가 일치하지 않습니다.',
@@ -129,14 +129,14 @@ describe('UserService', () => {
     it('should return token if password correct', async () => {
       const mockedUser = { id: 1, password: 'test' };
       userRepository.findOne.mockResolvedValue(mockedUser);
-      const result = await service.login(loginArgs);
+      const result = await service.login(loginArgs, '');
       expect(jwtService.sign).toHaveBeenCalledTimes(1);
-      expect(jwtService.sign).toHaveBeenCalledWith(mockedUser.id);
+      expect(jwtService.sign).toHaveBeenCalledWith(mockedUser.id, '');
       expect(result).toEqual({ ok: true, token: 'signed-token' });
     });
     it('should fail on exception', async () => {
       userRepository.findOne.mockRejectedValue(new Error());
-      const result = await service.login(loginArgs);
+      const result = await service.login(loginArgs, '');
       expect(result).toEqual({ ok: false, error: '로그인에 실패하였습니다.' });
     });
   });

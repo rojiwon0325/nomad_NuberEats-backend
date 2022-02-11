@@ -60,7 +60,10 @@ export class UserService {
     }
   }
 
-  async login({ email, password }: LoginInput): Promise<LoginOutput> {
+  async login(
+    { email, password }: LoginInput,
+    ip: string,
+  ): Promise<LoginOutput> {
     try {
       const user = await this.userRepository.findOne(
         { email },
@@ -71,7 +74,7 @@ export class UserService {
       } else if (user.password !== password) {
         return { ok: false, error: '계정 정보가 일치하지 않습니다.' };
       } else {
-        const token = this.jwtService.sign(user.id);
+        const token = this.jwtService.sign(user.id, ip);
         return { ok: true, token };
       }
     } catch {

@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CoreOutput } from '@global/dto/global.dto';
 import {
   LoginInput,
@@ -26,8 +26,11 @@ export class UserResolver {
   }
 
   @Mutation(() => LoginOutput)
-  async login(@Args('user') loginInput: LoginInput): Promise<LoginOutput> {
-    return this.userService.login(loginInput);
+  async login(
+    @Context() context: any,
+    @Args('user') loginInput: LoginInput,
+  ): Promise<LoginOutput> {
+    return this.userService.login(loginInput, context.ip);
   }
 
   @Role(['Any'])

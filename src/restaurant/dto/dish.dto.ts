@@ -3,7 +3,9 @@ import {
   ArgsType,
   Field,
   InputType,
+  Int,
   ObjectType,
+  PartialType,
   PickType,
 } from '@nestjs/graphql';
 import { Dish, DishOption } from '@restaurant/entity/dish.entity';
@@ -23,7 +25,7 @@ class CreateDishInputType extends PickType(Dish, [
 
 @ArgsType()
 export class CreateDishInput {
-  @Field(() => Number)
+  @Field(() => Int)
   restaurantId: number;
 
   @Field(() => CreateDishInputType)
@@ -34,4 +36,34 @@ export class CreateDishInput {
 export class CreateDishOutput extends CoreOutput {
   @Field(() => Dish, { nullable: true })
   result?: Dish;
+}
+
+@InputType()
+class EditDishInputType extends PickType(PartialType(Dish), [
+  'name',
+  'coverImage',
+  'price',
+  'option',
+  'description',
+]) {}
+
+@ArgsType()
+export class EditDishInput {
+  @Field(() => Int)
+  dishId: number;
+
+  @Field(() => EditDishInputType)
+  data: EditDishInputType;
+}
+
+@ObjectType()
+export class EditDishOutput extends CoreOutput {
+  @Field(() => Dish, { nullable: true })
+  result?: Dish;
+}
+
+@ArgsType()
+export class DeleteDishInput {
+  @Field(() => Int)
+  dishId: number;
 }

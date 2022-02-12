@@ -15,6 +15,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Restaurant } from '@restaurant/entity/restaurant.entity';
+import { Order } from 'src/order/order.entity';
 
 export enum UserRole {
   Client = 'client',
@@ -59,4 +60,16 @@ export class User extends CoreEntity {
   @ValidateNested({ each: true })
   @Type(() => Restaurant)
   restaurant?: Restaurant[];
+
+  @Field(() => [Order], { nullable: true })
+  @OneToMany(() => Order, (order) => order.customer)
+  @ValidateNested({ each: true })
+  @Type(() => Order)
+  order: Order[];
+
+  @Field(() => [Order], { nullable: true })
+  @OneToMany(() => Order, (order) => order.rider)
+  @ValidateNested({ each: true })
+  @Type(() => Order)
+  rider: Order[];
 }

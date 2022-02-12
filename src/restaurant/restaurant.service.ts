@@ -20,7 +20,13 @@ import {
   CreateCategoryInput,
 } from './dto/category.dto';
 import { PaginationInput } from '@global/dto/pagination.dto';
-import { CreateDishInput, CreateDishOutput } from './dto/dish.dto';
+import {
+  CreateDishInput,
+  CreateDishOutput,
+  DeleteDishInput,
+  EditDishInput,
+  EditDishOutput,
+} from './dto/dish.dto';
 import { Dish } from './entity/dish.entity';
 
 @Injectable()
@@ -228,6 +234,56 @@ export class RestaurantService {
       return { ok: true, result: dish };
     } catch {
       return { ok: false, error: '메뉴를 생성하지 못했습니다.' };
+    }
+  }
+
+  async checkDishPermision(
+    ownerId: number,
+    dishId: number,
+  ): Promise<CoreOutput> {
+    const dish = await this.dish.findOne(
+      { id: dishId },
+      { relations: ['restaurant'] },
+    );
+    if (!dish) {
+      return { ok: false, error: '해당 메뉴를 찾지 못했습니다.' };
+    }
+    if (ownerId !== dish.restaurant.ownerId) {
+      return { ok: false, error: '메뉴에 대한 권한이 없습니다.' };
+    }
+    return { ok: true };
+  }
+
+  async editDish(
+    owner: User,
+    { dishId, data }: EditDishInput,
+  ): Promise<EditDishOutput> {
+    try {
+      const permission = await this.checkDishPermision(owner.id, dishId);
+      if (permission.ok) {
+        await this.dish.save([{ id: dishId, data }]);
+        return { ok: true };
+      } else {
+        return permission;
+      }
+    } catch {
+      return { ok: false, error: '메뉴를 변경하지 못했습니다.' };
+    }
+  }
+  async deleteDish(
+    owner: User,
+    { dishId }: DeleteDishInput,
+  ): Promise<CoreOutput> {
+    try {
+      const permission = await this.checkDishPermision(owner.id, dishId);
+      if (permission.ok) {
+        await this.dish.delete(dishId);
+        return { ok: true };
+      } else {
+        return permission;
+      }
+    } catch {
+      return { ok: false, error: '메뉴를 삭제하지 못했습니다.' };
     }
   }
 }

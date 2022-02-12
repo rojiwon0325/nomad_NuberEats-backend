@@ -26,7 +26,7 @@ class EditRestaurantInputType extends PartialType(CreateRestaurantInput) {}
 
 @ArgsType()
 export class EditRestaurantInput {
-  @Field(() => Number)
+  @Field(() => Int)
   restaurantId: number;
 
   @Field(() => EditRestaurantInputType)

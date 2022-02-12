@@ -23,6 +23,7 @@ import { Restaurant } from '@restaurant/entity/restaurant.entity';
 import { Category } from '@restaurant/entity/category.entity';
 import { RestaurantModule } from '@restaurant/restaurant.module';
 import { Dish } from '@restaurant/entity/dish.entity';
+import { OrderModule } from './order/order.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -85,6 +86,7 @@ import { Dish } from '@restaurant/entity/dish.entity';
     GlobalModule,
     AuthModule,
     MailModule,
+    OrderModule,
   ],
   controllers: [],
   providers: [],

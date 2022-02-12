@@ -3,6 +3,7 @@ import {
   ArgsType,
   Field,
   InputType,
+  Int,
   ObjectType,
   PartialType,
   PickType,
@@ -28,7 +29,7 @@ export class LoginOutput extends CoreOutput {
 
 @ArgsType()
 export class UserProfileInput {
-  @Field(() => Number)
+  @Field(() => Int)
   id: number;
 }
 

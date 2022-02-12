@@ -1,5 +1,5 @@
 import { CoreEntity } from '@global/global.entity';
-import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, ManyToOne, RelationId } from 'typeorm';
 import { IsString, IsNumber, Length } from 'class-validator';
 import { Restaurant } from './restaurant.entity';
@@ -13,7 +13,7 @@ export class Dish extends CoreEntity {
   @IsString()
   name: string;
 
-  @Field(() => Int)
+  @Field(() => Number)
   @Column()
   @IsNumber()
   price: number;
@@ -60,6 +60,6 @@ class Choice {
   @Field(() => String)
   name: string;
 
-  @Field(() => Int)
+  @Field(() => Number)
   extraPrice: number;
 }

@@ -24,6 +24,8 @@ import { Category } from '@restaurant/entity/category.entity';
 import { RestaurantModule } from '@restaurant/restaurant.module';
 import { Dish } from '@restaurant/entity/dish.entity';
 import { OrderModule } from './order/order.module';
+import { Order } from './order/entity/order.entity';
+import { OrderedDish } from './order/entity/orderedDish.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -53,7 +55,15 @@ import { OrderModule } from './order/order.module';
       database: process.env.DB_DATABASE,
       synchronize: true,
       logging: false,
-      entities: [User, Verification, Restaurant, Category, Dish],
+      entities: [
+        User,
+        Verification,
+        Restaurant,
+        Category,
+        Dish,
+        Order,
+        OrderedDish,
+      ],
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,

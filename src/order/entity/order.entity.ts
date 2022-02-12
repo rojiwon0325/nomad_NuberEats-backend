@@ -5,10 +5,11 @@ import {
   ObjectType,
   registerEnumType,
 } from '@nestjs/graphql';
-import { Dish } from '@restaurant/entity/dish.entity';
 import { Restaurant } from '@restaurant/entity/restaurant.entity';
 import { User } from '@user/entity/user.entity';
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { IsEnum, IsNumber } from 'class-validator';
+import { OrderedDish } from './orderedDish.entity';
 
 export enum OrderStatus {
   Pending = 'pending',
@@ -44,15 +45,17 @@ export class Order extends CoreEntity {
   })
   restaurant?: Restaurant;
 
-  @Field(() => [Dish])
-  @ManyToMany(() => Dish)
-  @JoinTable()
-  dish: Dish[];
+  @Field(() => [OrderedDish])
+  @OneToMany(() => OrderedDish, (orderedDish) => orderedDish.order)
+  dish: OrderedDish[];
 
   @Field(() => Number)
+  @Column()
+  @IsNumber()
   totalPrice: number;
 
   @Field(() => OrderStatus)
   @Column({ type: 'enum', enum: OrderStatus })
+  @IsEnum(OrderStatus)
   status: OrderStatus;
 }

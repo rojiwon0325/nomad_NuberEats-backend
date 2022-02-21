@@ -14,8 +14,10 @@ import { OrderedDish } from './orderedDish.entity';
 export enum OrderStatus {
   Pending = 'pending',
   Cooking = 'cooking',
-  PickUp = 'pickUp',
-  Delivered = 'delivered',
+  waiting = 'waiting',
+  Delivering = 'delivering',
+  Canceled = 'canceled',
+  Complete = 'complete',
 }
 
 registerEnumType(OrderStatus, { name: 'OrdderStatus' });
@@ -47,7 +49,7 @@ export class Order extends CoreEntity {
 
   @Field(() => [OrderedDish])
   @OneToMany(() => OrderedDish, (orderedDish) => orderedDish.order)
-  dish: OrderedDish[];
+  orderedDish: OrderedDish[];
 
   @Field(() => Number)
   @Column()
@@ -55,7 +57,7 @@ export class Order extends CoreEntity {
   totalPrice: number;
 
   @Field(() => OrderStatus)
-  @Column({ type: 'enum', enum: OrderStatus })
+  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.Pending })
   @IsEnum(OrderStatus)
   status: OrderStatus;
 }

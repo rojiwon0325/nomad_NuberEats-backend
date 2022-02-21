@@ -10,8 +10,8 @@ import { Type } from 'class-transformer';
 @ObjectType()
 @Entity()
 export class Verification extends CoreEntity {
-  @Column()
   @Field(() => String)
+  @Column()
   code: string;
 
   @OneToOne(() => User, { onDelete: 'CASCADE' })

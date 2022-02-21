@@ -15,7 +15,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Restaurant } from '@restaurant/entity/restaurant.entity';
-import { Order } from 'src/order/order.entity';
+import { Order } from 'src/order/entity/order.entity';
 
 export enum UserRole {
   Client = 'client',
@@ -30,29 +30,29 @@ registerEnumType(UserRole, { name: 'UserRole' });
 @ObjectType()
 @Entity()
 export class User extends CoreEntity {
+  @Field(() => String)
   @Column({ unique: true })
   @IsEmail()
-  @Field(() => String)
   email: string;
 
+  @Field(() => String)
   @Column({ unique: true })
   @IsString()
-  @Field(() => String)
   username: string;
 
+  @Field(() => String)
   @Column({ select: false })
   @IsString()
-  @Field(() => String)
   password: string;
 
+  @Field(() => UserRole)
   @Column({ type: 'enum', enum: UserRole })
   @IsEnum(UserRole)
-  @Field(() => UserRole)
   role: UserRole;
 
+  @Field(() => Boolean)
   @Column({ default: false })
   @IsBoolean()
-  @Field(() => Boolean)
   verified: boolean;
 
   @Field(() => [Restaurant], { nullable: true })

@@ -1,9 +1,5 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import * as Joi from 'joi';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -12,7 +8,6 @@ import { User } from './user/entity/user.entity';
 import { UserModule } from './user/user.module';
 import { GlobalModule } from './global/global.module';
 import { JwtModule } from './jwt/jwt.module';
-import { JwtMiddleware } from '@jwt/jwt.middleware';
 import { AuthModule } from './auth/auth.module';
 import { Verification } from '@user/entity/verification.entity';
 import { MailerModule } from '@nestjs-modules/mailer';
@@ -26,6 +21,7 @@ import { Dish } from '@restaurant/entity/dish.entity';
 import { OrderModule } from './order/order.module';
 import { Order } from './order/entity/order.entity';
 import { OrderedDish } from './order/entity/orderedDish.entity';
+// import { Context } from 'apollo-server-core';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -65,17 +61,29 @@ import { OrderedDish } from './order/entity/orderedDish.entity';
         OrderedDish,
       ],
     }),
-    GraphQLModule.forRoot({
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
       autoSchemaFile: true,
-      context: ({ req }) => {
-        const ip = req.ip || req.connection.remoteAddress;
-        const isMe = req['userIp'] === ip;
-        return {
-          user: isMe && req['user'],
-          ip,
-          isMe,
-        };
+      subscriptions: {
+        'graphql-ws': {
+          onConnect: () => {
+            //context.extra.user = { user: 'b' };
+          },
+        },
+        'subscriptions-transport-ws': {
+          onConnect: (
+            { Authorization, authorization },
+            { _socket: { remoteAddress } },
+          ) => ({
+            token: (Authorization ?? authorization).split('Bearer ')[1],
+            userIp: remoteAddress,
+          }),
+        },
       },
+      context: ({ req }) => ({
+        token: req.headers.authorization.split('Bearer ')[1],
+        userIp: req.ip || req.connection.remoteAddress,
+      }),
     }),
     MailerModule.forRoot({
       transport: `smtps://${process.env.EMAIL_EMAIL}:${process.env.EMAIL_PASS}@${process.env.EMAIL_HOST}`,
@@ -101,11 +109,4 @@ import { OrderedDish } from './order/entity/orderedDish.entity';
   controllers: [],
   providers: [],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtMiddleware).forRoutes({
-      path: '/graphql',
-      method: RequestMethod.ALL,
-    });
-  }
-}
+export class AppModule {}

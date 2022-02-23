@@ -20,7 +20,7 @@ import { Order } from 'src/order/entity/order.entity';
 export enum UserRole {
   Client = 'client',
   Owner = 'owner',
-  Delivery = 'delivery',
+  Rider = 'rider',
   Admin = 'admin',
 }
 

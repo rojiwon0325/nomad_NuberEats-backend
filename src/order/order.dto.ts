@@ -1,4 +1,6 @@
-import { ArgsType, Field, InputType, Int } from '@nestjs/graphql';
+import { CoreOutput } from '@global/dto/global.dto';
+import { ArgsType, Field, InputType, Int, ObjectType } from '@nestjs/graphql';
+import { Order, OrderStatus } from './entity/order.entity';
 import { OrderOption } from './entity/orderedDish.entity';
 
 @InputType()
@@ -17,4 +19,36 @@ export class CreateOrderInput {
 
   @Field(() => [CreateOrderedDishType])
   orderList: CreateOrderedDishType[];
+}
+
+@ArgsType()
+export class FindManyOrderInput {
+  @Field(() => OrderStatus, { nullable: true })
+  status?: OrderStatus;
+}
+
+@ObjectType()
+export class FindManyOrderOutput extends CoreOutput {
+  @Field(() => [Order], { nullable: true })
+  order?: Order[];
+}
+
+@ArgsType()
+export class FindOrderByIdInput {
+  @Field(() => Int)
+  id: number;
+}
+@ObjectType()
+export class FindOrderByIdOutput extends CoreOutput {
+  @Field(() => Order, { nullable: true })
+  order?: Order;
+}
+
+@ArgsType()
+export class EditOrderInput {
+  @Field(() => Int)
+  id: number;
+
+  @Field(() => OrderStatus)
+  status: OrderStatus;
 }

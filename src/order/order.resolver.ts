@@ -1,9 +1,11 @@
 import { AuthUser } from '@auth/auth.decorator';
-import { PubSub } from 'graphql-subscriptions';
 import { Role } from '@auth/role.decorator';
 import { CoreOutput } from '@global/dto/global.dto';
+import { PUBSUB } from '@global/global.constant';
+import { Inject } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { User } from '@user/entity/user.entity';
+import { PubSub } from 'graphql-subscriptions';
 import {
   CreateOrderInput,
   EditOrderInput,
@@ -14,10 +16,12 @@ import {
 } from './order.dto';
 import { OrderService } from './order.service';
 
-const pubsub = new PubSub();
 @Resolver()
 export class OrderResolver {
-  constructor(private readonly orderService: OrderService) {}
+  constructor(
+    private readonly orderService: OrderService,
+    @Inject(PUBSUB) private readonly pubsub: PubSub,
+  ) {}
 
   @Query(() => FindManyOrderOutput)
   @Role(['Any'])
@@ -54,15 +58,14 @@ export class OrderResolver {
 
   @Query(() => Boolean)
   potato() {
-    pubsub.publish('photo', {
+    this.pubsub.publish('photo', {
       readyPhoto: 'hi nest',
     });
     return true;
   }
 
   @Subscription(() => String)
-  readyPhoto(@AuthUser() user: User) {
-    console.log(user);
-    return pubsub.asyncIterator('photo');
+  readyPhoto() {
+    return this.pubsub.asyncIterator('photo');
   }
 }

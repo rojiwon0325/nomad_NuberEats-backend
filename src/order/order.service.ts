@@ -1,5 +1,13 @@
 import { CoreOutput } from '@global/dto/global.dto';
-import { Injectable } from '@nestjs/common';
+import {
+  ASSIGN_RIDER,
+  EDIT_ORDER_STATUS,
+  NEW_ORDER,
+  PUBSUB,
+  WAITING_RIDER,
+} from '@global/global.constant';
+import { PubSub } from 'graphql-subscriptions';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Dish } from '@restaurant/entity/dish.entity';
 import { Restaurant } from '@restaurant/entity/restaurant.entity';
@@ -14,6 +22,7 @@ import {
   FindManyOrderOutput,
   FindOrderByIdInput,
   FindOrderByIdOutput,
+  TakeOrderInput,
 } from './order.dto';
 
 @Injectable()
@@ -26,11 +35,12 @@ export class OrderService {
     @InjectRepository(Restaurant)
     private readonly restaurantRespository: Repository<Restaurant>,
     @InjectRepository(Dish) private readonly dishRepository: Repository<Dish>,
+    @Inject(PUBSUB) private readonly pubsub: PubSub,
   ) {}
 
   async createOrder(
     customer: User,
-    { restaurantId, orderList }: CreateOrderInput,
+    { restaurantId, orderList, delivery, address }: CreateOrderInput,
   ): Promise<CoreOutput> {
     try {
       const restaurant = await this.restaurantRespository.findOne(restaurantId);
@@ -67,14 +77,28 @@ export class OrderService {
         );
         orderedDishList.push(orderedDish);
       }
-      await this.orderRepository.save(
+      const order = await this.orderRepository.save(
         this.orderRepository.create({
           customer,
           restaurant,
           totalPrice,
           orderedDish: orderedDishList,
+          delivery,
+          address,
         }),
       );
+      await this.pubsub.publish(NEW_ORDER, {
+        newOrder: {
+          order: {
+            id: order.id,
+            totalPrice,
+            orderedDish: orderedDishList,
+            delivery,
+            address,
+          },
+          ownerId: restaurant.ownerId,
+        },
+      });
       return { ok: true };
     } catch {
       return { ok: false, error: '주문이 접수되지 않았습니다.' };
@@ -157,30 +181,57 @@ export class OrderService {
     user: User,
     { id: orderId, status }: EditOrderInput,
   ): Promise<CoreOutput> {
-    // 배달기사 배정은 어떻게 해야할까?
     try {
-      const order = await this.orderRepository.findOne(orderId, {
-        relations: ['restaurant'],
-      });
+      const order = await this.orderRepository.findOne(orderId);
       if (!order) {
         return { ok: false, error: '주문 정보를 찾지 못했습니다.' };
       }
       if (!this.checkPermisson(user, order)) {
         return { ok: false, error: '권힌이 없습니다.' };
       }
+
+      const publish = (triggerName: string, keyName = 'updateOrder') =>
+        this.pubsub.publish(triggerName, {
+          [keyName]: {
+            id: order.id,
+            status,
+            address: order.address,
+            createdAt: order.createdAt,
+            totalPrice: order.totalPrice,
+            customerId: order.customerId,
+            orderedDish: order.orderedDish,
+            delievery: order.delivery,
+            restaurant: {
+              name: order.restaurant.name,
+              address: order.restaurant.address,
+            },
+          },
+        });
+
       if (user.role === UserRole.Owner) {
         switch (status) {
           case OrderStatus.Cooking:
-          case OrderStatus.Waiting:
+            if (order.delivery) {
+              await Promise.all([
+                publish(WAITING_RIDER, 'waitingRider'),
+                publish(EDIT_ORDER_STATUS),
+              ]);
+            } else {
+              await publish(EDIT_ORDER_STATUS);
+            }
+            break;
           case OrderStatus.Canceled:
           case OrderStatus.PickedUp:
+            await publish(EDIT_ORDER_STATUS);
+          case OrderStatus.Waiting:
             break;
           default:
             return { ok: false, error: '권힌이 없습니다.' };
         }
-      } else {
+      } else if (user.role === UserRole.Rider) {
         switch (status) {
           case OrderStatus.Delivered:
+            await publish(EDIT_ORDER_STATUS);
           case OrderStatus.Delivering:
             break;
           default:
@@ -191,6 +242,20 @@ export class OrderService {
       return { ok: true };
     } catch {
       return { ok: false, error: '주문 정보 변경에 실패하였습니다.' };
+    }
+  }
+
+  async takeOrder(rider: User, { id }: TakeOrderInput): Promise<CoreOutput> {
+    try {
+      const order = await this.orderRepository.findOneOrFail({ id });
+      if (order.rider) {
+        return { ok: false, error: '이미 라이더가 배정되었습니다.' };
+      }
+      await this.orderRepository.save([{ id, rider }]);
+      await this.pubsub.publish(ASSIGN_RIDER, { assignRider: order });
+      return { ok: true };
+    } catch {
+      return { ok: false, error: '주문 정보를 찾지 못했습니다.' };
     }
   }
 }

@@ -19,6 +19,12 @@ export class CreateOrderInput {
 
   @Field(() => [CreateOrderedDishType])
   orderList: CreateOrderedDishType[];
+
+  @Field(() => Boolean, { defaultValue: true })
+  delivery: boolean;
+
+  @Field(() => String)
+  address: string;
 }
 
 @ArgsType()
@@ -51,4 +57,16 @@ export class EditOrderInput {
 
   @Field(() => OrderStatus)
   status: OrderStatus;
+}
+
+@ArgsType()
+export class UpdateOrderInput {
+  @Field(() => Int)
+  id: number;
+}
+
+@ArgsType()
+export class TakeOrderInput {
+  @Field(() => Int)
+  id: number;
 }

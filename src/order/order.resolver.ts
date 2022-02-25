@@ -25,7 +25,7 @@ import {
 } from './order.dto';
 import { OrderService } from './order.service';
 
-@Resolver()
+@Resolver(() => Order)
 export class OrderResolver {
   constructor(
     private readonly orderService: OrderService,

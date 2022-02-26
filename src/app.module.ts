@@ -65,6 +65,7 @@ import { Payment } from './payment/entity/payment.entity';
       ],
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
+      debug: true,
       driver: ApolloDriver,
       autoSchemaFile: true,
       subscriptions: {
@@ -78,13 +79,13 @@ import { Payment } from './payment/entity/payment.entity';
             { Authorization, authorization },
             { _socket: { remoteAddress } },
           ) => ({
-            token: (Authorization ?? authorization).split('Bearer ')[1],
+            token: (Authorization ?? authorization)?.split('Bearer ')[1],
             userIp: remoteAddress,
           }),
         },
       },
       context: ({ req }) => ({
-        token: req.headers.authorization.split('Bearer ')[1],
+        token: req.headers.authorization?.split('Bearer ')[1],
         userIp: req.ip || req.connection.remoteAddress,
       }),
     }),

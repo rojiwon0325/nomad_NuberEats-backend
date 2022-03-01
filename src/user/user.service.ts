@@ -7,6 +7,7 @@ import {
   LoginInput,
   LoginOutput,
   UserProfileOutput,
+  VerifyEmailOutput,
 } from './user.dto';
 import { User } from './entity/user.entity';
 import { Verification } from './entity/verification.entity';
@@ -121,7 +122,7 @@ export class UserService {
     }
   }
 
-  async verifyEmail(code: string): Promise<CoreOutput> {
+  async verifyEmail(code: string): Promise<VerifyEmailOutput> {
     try {
       const verify = await this.verification.findOneOrFail(
         { code },
@@ -130,7 +131,7 @@ export class UserService {
       verify.user.verified = true;
       await this.userRepository.save(verify.user);
       await this.verification.delete(verify.id);
-      return { ok: true };
+      return { ok: true, userId: verify.user.id };
     } catch {
       return { ok: false, error: '인증에 실패하였습니다.' };
     }

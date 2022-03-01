@@ -24,9 +24,9 @@ export class AuthGuard implements CanActivate {
       const gqlContext = GqlExecutionContext.create(context).getContext();
       const decoded = this.jwtService.verify(gqlContext['token']);
       if (
-        typeof decoded === 'object' ||
-        decoded.hasOwnProperty('id') ||
-        decoded.hasOwnProperty('ip')
+        typeof decoded !== 'object' ||
+        !decoded.hasOwnProperty('id') ||
+        !decoded.hasOwnProperty('ip')
       ) {
         return false;
       }

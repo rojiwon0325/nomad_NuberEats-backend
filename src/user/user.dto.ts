@@ -64,3 +64,9 @@ export class VerifyEmailInput {
   @Field(() => String, { nullable: true })
   code?: string;
 }
+
+@ObjectType()
+export class VerifyEmailOutput extends CoreOutput {
+  @Field(() => Int, { nullable: true })
+  userId?: number;
+}

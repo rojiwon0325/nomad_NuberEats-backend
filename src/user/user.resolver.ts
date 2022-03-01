@@ -8,6 +8,7 @@ import {
   UserProfileOutput,
   CreateAccountInput,
   VerifyEmailInput,
+  VerifyEmailOutput,
 } from './user.dto';
 import { UserService } from './user.service';
 import { User } from './entity/user.entity';
@@ -30,7 +31,7 @@ export class UserResolver {
     @Context() context: any,
     @Args('user') loginInput: LoginInput,
   ): Promise<LoginOutput> {
-    return this.userService.login(loginInput, context.ip);
+    return this.userService.login(loginInput, context.userIp);
   }
 
   @Role(['Any'])
@@ -56,8 +57,8 @@ export class UserResolver {
     return this.userService.editProfile(authUser.id, edit);
   }
 
-  @Mutation(() => CoreOutput)
-  verifyEmail(@Args() { code }: VerifyEmailInput): Promise<CoreOutput> {
+  @Mutation(() => VerifyEmailOutput)
+  verifyEmail(@Args() { code }: VerifyEmailInput): Promise<VerifyEmailOutput> {
     return this.userService.verifyEmail(code);
   }
 }

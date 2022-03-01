@@ -41,7 +41,7 @@ export class UserResolver {
 
   @Role(['Any'])
   @Query(() => UserProfileOutput)
-  async userProfile(
+  userProfile(
     @Args() userProfileInput: UserProfileInput,
   ): Promise<UserProfileOutput> {
     return this.userService.findById(userProfileInput.id);
@@ -49,7 +49,7 @@ export class UserResolver {
 
   @Role(['Any'])
   @Mutation(() => CoreOutput)
-  async editProfile(
+  editProfile(
     @AuthUser() authUser: User,
     @Args() edit: EditProfileInput,
   ): Promise<CoreOutput> {
@@ -57,7 +57,7 @@ export class UserResolver {
   }
 
   @Mutation(() => CoreOutput)
-  async verifyEmail(@Args() { code }: VerifyEmailInput): Promise<CoreOutput> {
+  verifyEmail(@Args() { code }: VerifyEmailInput): Promise<CoreOutput> {
     return this.userService.verifyEmail(code);
   }
 }

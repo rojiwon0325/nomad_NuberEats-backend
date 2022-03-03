@@ -68,25 +68,16 @@ import { Payment } from './payment/entity/payment.entity';
       debug: true,
       driver: ApolloDriver,
       autoSchemaFile: true,
-      subscriptions: {
-        'graphql-ws': {
-          onConnect: () => {
-            //context.extra.user = { user: 'b' };
-          },
-        },
-        'subscriptions-transport-ws': {
-          onConnect: (
-            { Authorization, authorization },
-            { _socket: { remoteAddress } },
-          ) => ({
-            token: (Authorization ?? authorization)?.split('Bearer ')[1],
-            userIp: remoteAddress,
-          }),
-        },
+      cors: {
+        credentials: true,
+        origin: true,
       },
-      context: ({ req }) => ({
-        token: req.headers.authorization?.split('Bearer ')[1],
-        userIp: req.ip || req.connection.remoteAddress,
+      subscriptions: {
+        'graphql-ws': true,
+        'subscriptions-transport-ws': true,
+      },
+      context: ({ res }) => ({
+        res,
       }),
     }),
     MailerModule.forRoot({

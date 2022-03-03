@@ -22,22 +22,19 @@ export class AuthGuard implements CanActivate {
         return true;
       }
       const gqlContext = GqlExecutionContext.create(context).getContext();
-      const decoded = this.jwtService.verify(gqlContext['token']);
-      if (
-        typeof decoded !== 'object' ||
-        !decoded.hasOwnProperty('id') ||
-        !decoded.hasOwnProperty('ip')
-      ) {
+      const decoded = this.jwtService.verify(
+        gqlContext['req'].cookies['access_token'],
+      );
+      if (typeof decoded !== 'object' || !decoded.hasOwnProperty('id')) {
         return false;
       }
-      const userIp: string = gqlContext['userIp'];
       const { user } = await this.userService.findById(decoded['id']);
-      const isMe = decoded['ip'] === userIp;
       if (!user) {
         return false;
       }
+
       gqlContext['user'] = user;
-      return isMe && (roles.includes('Any') || roles.includes(user.role));
+      return roles.includes('Any') || roles.includes(user.role);
     } catch {
       return false;
     }

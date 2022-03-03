@@ -14,7 +14,6 @@ import { UserService } from './user.service';
 import { User } from './entity/user.entity';
 import { AuthUser } from '@auth/auth.decorator';
 import { Role } from '@auth/role.decorator';
-
 @Resolver()
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
@@ -28,10 +27,16 @@ export class UserResolver {
 
   @Mutation(() => LoginOutput)
   async login(
-    @Context() context: any,
     @Args('user') loginInput: LoginInput,
+    @Context() ctx: any,
   ): Promise<LoginOutput> {
-    return this.userService.login(loginInput, context.userIp);
+    const result = await this.userService.login(loginInput);
+    if (result.token) {
+      ctx.res.cookie('access_token', result.token, { httpOnly: true });
+      return { ok: true };
+    } else {
+      return result;
+    }
   }
 
   @Role(['Any'])

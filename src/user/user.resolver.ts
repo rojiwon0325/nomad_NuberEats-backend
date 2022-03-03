@@ -31,7 +31,7 @@ export class UserResolver {
     @Context() ctx: any,
   ): Promise<LoginOutput> {
     const result = await this.userService.login(loginInput);
-    if (result.token) {
+    if ('token' in result) {
       ctx.res.cookie('access_token', result.token, { httpOnly: true });
       return { ok: true };
     } else {

@@ -22,10 +22,7 @@ export class CreateAccountInput extends PickType(User, [
 @InputType()
 export class LoginInput extends PickType(User, ['email', 'password']) {}
 @ObjectType()
-export class LoginOutput extends CoreOutput {
-  @Field(() => String, { nullable: true })
-  token?: string;
-}
+export class LoginOutput extends CoreOutput {}
 
 @ArgsType()
 export class UserProfileInput {

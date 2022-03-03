@@ -26,17 +26,11 @@ export class UserResolver {
   }
 
   @Mutation(() => LoginOutput)
-  async login(
+  login(
     @Args('user') loginInput: LoginInput,
     @Context() ctx: any,
   ): Promise<LoginOutput> {
-    const result = await this.userService.login(loginInput);
-    if ('token' in result) {
-      ctx.res.cookie('access_token', result.token, { httpOnly: true });
-      return { ok: true };
-    } else {
-      return result;
-    }
+    return this.userService.login(loginInput, ctx.res);
   }
 
   @Role(['Any'])

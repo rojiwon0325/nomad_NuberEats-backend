@@ -61,10 +61,7 @@ export class UserService {
     }
   }
 
-  async login({
-    email,
-    password,
-  }: LoginInput): Promise<LoginOutput | { token: string }> {
+  async login({ email, password }: LoginInput, res: any): Promise<LoginOutput> {
     try {
       const user = await this.userRepository.findOne(
         { email },
@@ -76,7 +73,9 @@ export class UserService {
         return { ok: false, error: '계정 정보가 일치하지 않습니다.' };
       } else {
         const token = this.jwtService.sign(user.id);
-        return { token };
+        res.cookie('access_token', token, { httpOnly: true });
+        res.cookie('isLogin', 'yes');
+        return { ok: true };
       }
     } catch {
       return { ok: false, error: '로그인에 실패하였습니다.' };

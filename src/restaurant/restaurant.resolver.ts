@@ -27,6 +27,7 @@ import {
   AllCategoryOutput,
   CategoryOutput,
   CreateCategoryInput,
+  UpdateCategoryImageInput,
 } from './dto/category.dto';
 import { PaginationInput } from '@global/dto/pagination.dto';
 import { Dish } from './entity/dish.entity';
@@ -106,8 +107,8 @@ export class CategoryResolver {
   constructor(private readonly restaurantService: RestaurantService) {}
 
   @ResolveField(() => Int)
-  restaurantCount(@Parent() { name }: Category): Promise<number> {
-    return this.restaurantService.countRestaurant(name);
+  restaurantCount(@Parent() category: Category): Promise<number> {
+    return this.restaurantService.countRestaurant(category);
   }
 
   @Mutation(() => CoreOutput)
@@ -116,6 +117,12 @@ export class CategoryResolver {
     @Args('category') createCategoryInput: CreateCategoryInput,
   ): Promise<CoreOutput> {
     return this.restaurantService.createCategory(createCategoryInput);
+  }
+
+  //@Role(['Admin'])
+  @Mutation(() => CoreOutput)
+  updateCategoryImage(@Args() update: UpdateCategoryImageInput) {
+    return this.restaurantService.updateCategoryImage(update);
   }
 
   @Query(() => AllCategoryOutput)

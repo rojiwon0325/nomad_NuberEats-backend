@@ -18,6 +18,7 @@ import {
   AllCategoryOutput,
   CategoryOutput,
   CreateCategoryInput,
+  UpdateCategoryImageInput,
 } from './dto/category.dto';
 import { PaginationInput } from '@global/dto/pagination.dto';
 import {
@@ -60,8 +61,22 @@ export class RestaurantService {
     }
   }
 
-  countRestaurant(name: string): Promise<number> {
-    return this.restaurant.count({ category: { name } });
+  async updateCategoryImage({
+    id,
+    coverImage,
+  }: UpdateCategoryImageInput): Promise<CoreOutput> {
+    try {
+      const category = await this.category.findOneOrFail({ id });
+      category.coverImage = coverImage;
+      await this.category.save(category);
+      return { ok: true };
+    } catch {
+      return { ok: false, error: '카테고리 수정을 실패하였습니다.' };
+    }
+  }
+
+  countRestaurant(category: Category): Promise<number> {
+    return this.restaurant.count({ category });
   }
 
   async findCategoryByName({ name }: ByNameInput): Promise<CategoryOutput> {

@@ -119,8 +119,8 @@ export class CategoryResolver {
     return this.restaurantService.createCategory(createCategoryInput);
   }
 
-  //@Role(['Admin'])
   @Mutation(() => CoreOutput)
+  @Role(['Admin'])
   updateCategoryImage(@Args() update: UpdateCategoryImageInput) {
     return this.restaurantService.updateCategoryImage(update);
   }

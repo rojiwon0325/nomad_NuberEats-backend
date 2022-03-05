@@ -14,7 +14,6 @@ import { Verification } from './entity/verification.entity';
 import { CoreOutput } from '@global/dto/global.dto';
 import { JwtService } from '@jwt/jwt.service';
 import { MailService } from '@mail/mail.service';
-
 @Injectable()
 export class UserService {
   constructor(
@@ -74,7 +73,6 @@ export class UserService {
       } else {
         const token = this.jwtService.sign(user.id);
         res.cookie('access_token', token, { httpOnly: true });
-        res.cookie('isLogin', 'yes');
         return { ok: true };
       }
     } catch {
@@ -89,6 +87,17 @@ export class UserService {
     } catch {
       return { ok: false, error: '사용자를 찾지 못했습니다.' };
     }
+  }
+
+  async isExist(token: string): Promise<boolean> {
+    try {
+      const decoded = this.jwtService.verify(token);
+      if (typeof decoded === 'object' && decoded.hasOwnProperty('id')) {
+        const result = await this.userRepository.count(decoded['id']);
+        return result > 0;
+      }
+    } catch {}
+    return false;
   }
 
   async editProfile(id: number, edit: EditProfileInput): Promise<CoreOutput> {

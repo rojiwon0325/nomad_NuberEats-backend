@@ -33,6 +33,21 @@ export class UserResolver {
     return this.userService.login(loginInput, ctx.res);
   }
 
+  @Query(() => Boolean)
+  logout(@Context() ctx: any): boolean {
+    ctx.res.cookie('access_token', '', { httpOnly: true, expires: new Date() });
+    return true;
+  }
+
+  @Query(() => Boolean)
+  isLogin(@Context() ctx: any): boolean | Promise<boolean> {
+    const token = ctx['req'].cookies['access_token'];
+    if (token === undefined) {
+      return false;
+    }
+    return this.userService.isExist(token);
+  }
+
   @Role(['Any'])
   @Query(() => User, { nullable: true })
   me(@AuthUser() authUser: User): User | undefined {

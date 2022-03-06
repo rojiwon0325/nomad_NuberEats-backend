@@ -9,20 +9,22 @@ import {
   PickType,
 } from '@nestjs/graphql';
 import { User } from './entity/user.entity';
-import { Verification } from './entity/verification.entity';
 
 @InputType()
 export class CreateAccountInput extends PickType(User, [
   'email',
   'username',
-  'password',
   'role',
-]) {}
+]) {
+  @Field(() => String)
+  password: string;
+}
 
 @InputType()
-export class LoginInput extends PickType(User, ['email', 'password']) {}
-@ObjectType()
-export class LoginOutput extends CoreOutput {}
+export class LoginInput extends PickType(User, ['email']) {
+  @Field(() => String)
+  password: string;
+}
 
 @ArgsType()
 export class UserProfileInput {
@@ -37,24 +39,13 @@ export class UserProfileOutput extends CoreOutput {
 }
 
 @InputType()
-class EditProfileInputType extends PickType(PartialType(User), [
+export class EditProfileInput extends PickType(PartialType(User), [
   'email',
   'username',
 ]) {}
 
 // PartialType이 감싼 형태 x
 // PickType에 PartialType 인자로 넣기 o
-
-@ArgsType()
-export class EditProfileInput {
-  @Field(() => String, { nullable: true })
-  email?: string;
-  @Field(() => String, { nullable: true })
-  username?: string;
-}
-
-@InputType()
-class VerifyEmailInputType extends PickType(Verification, ['code']) {}
 
 @ArgsType()
 export class VerifyEmailInput {

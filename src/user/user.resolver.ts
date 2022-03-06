@@ -2,7 +2,6 @@ import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CoreOutput } from '@global/dto/global.dto';
 import {
   LoginInput,
-  LoginOutput,
   EditProfileInput,
   UserProfileInput,
   UserProfileOutput,
@@ -25,11 +24,11 @@ export class UserResolver {
     return this.userService.createAccount(createAccountInput);
   }
 
-  @Mutation(() => LoginOutput)
+  @Mutation(() => CoreOutput)
   login(
     @Args('user') loginInput: LoginInput,
     @Context() ctx: any,
-  ): Promise<LoginOutput> {
+  ): Promise<CoreOutput> {
     return this.userService.login(loginInput, ctx.res);
   }
 
@@ -66,7 +65,7 @@ export class UserResolver {
   @Mutation(() => CoreOutput)
   editProfile(
     @AuthUser() authUser: User,
-    @Args() edit: EditProfileInput,
+    @Args('data') edit: EditProfileInput,
   ): Promise<CoreOutput> {
     return this.userService.editProfile(authUser.id, edit);
   }

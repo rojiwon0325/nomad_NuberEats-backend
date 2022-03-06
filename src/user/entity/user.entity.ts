@@ -18,10 +18,10 @@ import { Restaurant } from '@restaurant/entity/restaurant.entity';
 import { Order } from 'src/order/entity/order.entity';
 
 export enum UserRole {
-  Client = 'client',
-  Owner = 'owner',
-  Rider = 'rider',
-  Admin = 'admin',
+  Client = 'Client',
+  Owner = 'Owner',
+  Rider = 'Rider',
+  Admin = 'Admin',
 }
 
 registerEnumType(UserRole, { name: 'UserRole' });
@@ -40,7 +40,6 @@ export class User extends CoreEntity {
   @IsString()
   username: string;
 
-  @Field(() => String)
   @Column({ select: false })
   @IsString()
   password: string;

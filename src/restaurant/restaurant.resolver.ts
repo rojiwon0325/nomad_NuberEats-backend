@@ -16,6 +16,7 @@ import { Restaurant } from './entity/restaurant.entity';
 import {
   ByNameInput,
   CreateRestaurantInput,
+  CreateRestaurantOutput,
   EditRestaurantInput,
   NamePageInput,
   RestaurantOutput,
@@ -43,12 +44,12 @@ import {
 export class RestaurantResolver {
   constructor(private readonly restaurantService: RestaurantService) {}
 
-  @Mutation(() => CoreOutput)
+  @Mutation(() => CreateRestaurantOutput)
   @Role(['Owner'])
   createRestaurant(
     @AuthUser() authUser: User,
     @Args('restaurant') createRestaurantInput: CreateRestaurantInput,
-  ): Promise<CoreOutput> {
+  ): Promise<CreateRestaurantOutput> {
     return this.restaurantService.createRestaurant(
       authUser,
       createRestaurantInput,
@@ -71,6 +72,15 @@ export class RestaurantResolver {
     @Args() input: ByNameInput,
   ): Promise<CoreOutput> {
     return this.restaurantService.deleteRestaurant(authUser, input);
+  }
+
+  @Query(() => RestaurantsOutput)
+  @Role(['Owner'])
+  findAllMyRestaurant(
+    @AuthUser() authUser: User,
+    @Args() { page }: PaginationInput,
+  ): Promise<RestaurantsOutput> {
+    return this.restaurantService.findAllMyRestaurant(authUser, page);
   }
 
   @Query(() => RestaurantsOutput)

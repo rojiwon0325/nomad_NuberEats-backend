@@ -8,6 +8,7 @@ import { Restaurant } from './entity/restaurant.entity';
 import {
   ByNameInput,
   CreateRestaurantInput,
+  CreateRestaurantOutput,
   EditRestaurantInput,
   NamePageInput,
   RestaurantOutput,
@@ -93,16 +94,16 @@ export class RestaurantService {
     page,
   }: NamePageInput): Promise<RestaurantsOutput> {
     try {
+      const take = 10;
       const [result, totalResults] = await this.restaurant.findAndCount({
         where: { category: { name } },
-        take: 25,
-        skip: (page - 1) * 25,
+        take,
+        skip: (page - 1) * take,
       });
       return {
         ok: true,
         result,
         totalResults,
-        totalPage: Math.ceil(totalResults / 25),
       };
     } catch {
       return { ok: false, error: '가게 정보를 불러오지 못했습니다.' };
@@ -113,21 +114,40 @@ export class RestaurantService {
     page,
   }: PaginationInput): Promise<RestaurantsOutput> {
     try {
+      const take = 10;
       const [result, totalResults] = await this.restaurant.findAndCount({
-        take: 25,
-        skip: (page - 1) * 25,
+        take,
+        skip: (page - 1) * take,
       });
       return {
         ok: true,
         result,
         totalResults,
-        totalPage: Math.ceil(totalResults / 25),
       };
     } catch {
       return { ok: false, error: '가게 정보를 불러오지 못했습니다.' };
     }
   }
-
+  async findAllMyRestaurant(
+    owner: User,
+    page: number,
+  ): Promise<RestaurantsOutput> {
+    try {
+      const take = 10;
+      const [result, totalResults] = await this.restaurant.findAndCount({
+        where: { owner },
+        take,
+        skip: (page - 1) * take,
+      });
+      return {
+        ok: true,
+        result,
+        totalResults,
+      };
+    } catch {
+      return { ok: false, error: '가게 정보를 불러오지 못했습니다.' };
+    }
+  }
   async findRestaurantByName({ name }: ByNameInput): Promise<RestaurantOutput> {
     try {
       const result = await this.restaurant.findOneOrFail({ name });
@@ -140,7 +160,7 @@ export class RestaurantService {
   async createRestaurant(
     owner: User,
     createRestaurantInput: CreateRestaurantInput,
-  ): Promise<CoreOutput> {
+  ): Promise<CreateRestaurantOutput> {
     try {
       const category = await this.category.findOne({
         name: createRestaurantInput.category,
@@ -150,8 +170,8 @@ export class RestaurantService {
         category,
       });
       newRestaurant.owner = owner;
-      await this.restaurant.save(newRestaurant);
-      return { ok: true };
+      const result = await this.restaurant.save(newRestaurant);
+      return { ok: true, result };
     } catch {
       return { ok: false, error: '가게를 생성하지 못했습니다.' };
     }
@@ -206,6 +226,7 @@ export class RestaurantService {
     page,
   }: SearchRestaurantInput): Promise<RestaurantsOutput> {
     try {
+      const take = 10;
       const [result, totalResults] = await this.restaurant.findAndCount({
         where: [
           {
@@ -215,14 +236,13 @@ export class RestaurantService {
             category: { name: ILike(`%${key}%`) },
           },
         ],
-        take: 25,
-        skip: (page - 1) * 25,
+        take,
+        skip: (page - 1) * take,
       });
       return {
         ok: true,
         result,
         totalResults,
-        totalPage: Math.ceil(totalResults / 25),
       };
     } catch {
       return {

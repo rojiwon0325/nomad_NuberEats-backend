@@ -21,6 +21,12 @@ export class CreateRestaurantInput extends PickType(Restaurant, [
   category?: string;
 }
 
+@ObjectType()
+export class CreateRestaurantOutput extends CoreOutput {
+  @Field(() => Restaurant, { nullable: true })
+  result?: Restaurant;
+}
+
 @InputType()
 class EditRestaurantInputType extends PartialType(CreateRestaurantInput) {}
 
@@ -40,12 +46,9 @@ export class ByNameInput {
 }
 
 @ArgsType()
-export class NamePageInput {
+export class NamePageInput extends PaginationInput {
   @Field(() => String)
   name: string;
-
-  @Field(() => Int)
-  page: number;
 }
 
 @ObjectType()

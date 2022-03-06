@@ -5,11 +5,10 @@ import {
   CreateAccountInput,
   EditProfileInput,
   LoginInput,
-  LoginOutput,
   UserProfileOutput,
   VerifyEmailOutput,
 } from './user.dto';
-import { User } from './entity/user.entity';
+import { User, UserRole } from './entity/user.entity';
 import { Verification } from './entity/verification.entity';
 import { CoreOutput } from '@global/dto/global.dto';
 import { JwtService } from '@jwt/jwt.service';
@@ -35,7 +34,13 @@ export class UserService {
         return { ok: false, error: '이미 존재하는 이메일입니다.' };
       }
       const user = await this.userRepository.save(
-        this.userRepository.create({ email, username, password, role }),
+        this.userRepository.create({
+          email,
+          username,
+          password,
+          role,
+          ...(role === UserRole.Owner && { restaurant: [] }),
+        }),
       );
       const { error } = await this.sendVerification(user);
       return { ok: true, error };
@@ -60,7 +65,7 @@ export class UserService {
     }
   }
 
-  async login({ email, password }: LoginInput, res: any): Promise<LoginOutput> {
+  async login({ email, password }: LoginInput, res: any): Promise<CoreOutput> {
     try {
       const user = await this.userRepository.findOne(
         { email },

@@ -46,6 +46,12 @@ export class ByNameInput {
 }
 
 @ArgsType()
+export class ByIdInput {
+  @Field(() => Int)
+  id: number;
+}
+
+@ArgsType()
 export class NamePageInput extends PaginationInput {
   @Field(() => String)
   name: string;

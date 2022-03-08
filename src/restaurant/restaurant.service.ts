@@ -148,9 +148,12 @@ export class RestaurantService {
       return { ok: false, error: '가게 정보를 불러오지 못했습니다.' };
     }
   }
-  async findRestaurantByName({ name }: ByNameInput): Promise<RestaurantOutput> {
+  async findRestaurantById(id: number): Promise<RestaurantOutput> {
     try {
-      const result = await this.restaurant.findOneOrFail({ name });
+      const result = await this.restaurant.findOneOrFail({
+        where: { id },
+        relations: ['menu'],
+      });
       return { ok: true, result };
     } catch {
       return { ok: false, error: '가게 정보를 불러오지 못했습니다.' };

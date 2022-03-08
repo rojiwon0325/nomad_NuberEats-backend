@@ -14,6 +14,7 @@ import { User } from '@user/entity/user.entity';
 import { Category } from './entity/category.entity';
 import { Restaurant } from './entity/restaurant.entity';
 import {
+  ByIdInput,
   ByNameInput,
   CreateRestaurantInput,
   CreateRestaurantOutput,
@@ -98,10 +99,8 @@ export class RestaurantResolver {
   }
 
   @Query(() => RestaurantOutput)
-  findRestaurantByName(
-    @Args() byNameInput: ByNameInput,
-  ): Promise<RestaurantOutput> {
-    return this.restaurantService.findRestaurantByName(byNameInput);
+  findRestaurantById(@Args() { id }: ByIdInput): Promise<RestaurantOutput> {
+    return this.restaurantService.findRestaurantById(id);
   }
 
   @Query(() => RestaurantsOutput)

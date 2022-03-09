@@ -24,6 +24,7 @@ import { OrderedDish } from './order/entity/orderedDish.entity';
 // import { Context } from 'apollo-server-core';
 import { PaymentModule } from './payment/payment.module';
 import { Payment } from './payment/entity/payment.entity';
+import { UploadModule } from './upload/upload.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -42,6 +43,8 @@ import { Payment } from './payment/entity/payment.entity';
         EMAIL_PASS: Joi.string().required(),
         EMAIL_HOST: Joi.string().required(),
         EMAIL_USER: Joi.string().required(),
+        AWS_ID: Joi.string().required(),
+        AWS_SECRET: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
@@ -101,6 +104,7 @@ import { Payment } from './payment/entity/payment.entity';
     MailModule,
     OrderModule,
     PaymentModule,
+    UploadModule,
   ],
   controllers: [],
   providers: [],

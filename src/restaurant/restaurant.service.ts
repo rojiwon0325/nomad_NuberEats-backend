@@ -263,7 +263,7 @@ export class RestaurantService {
       const restaurant = await this.restaurant.findOneOrFail({
         id: restaurantId,
       });
-      if (owner.id !== restaurant.id) {
+      if (owner.id !== restaurant.ownerId) {
         return { ok: false, error: '메뉴를 생성할 권한이 없습니다.' };
       }
       const dish = await this.dish.save(
